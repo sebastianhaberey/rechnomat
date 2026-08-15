@@ -3,10 +3,12 @@ from pathlib import Path
 
 import cloup
 from click import help_option, pass_obj, version_option
-from cloup import HelpFormatter, HelpTheme, Section, group, option, pass_context
+from cloup import HelpFormatter, HelpTheme, Section, argument, group, option, pass_context
 
-from command.info import InfoCommand
 from rechnomat import config
+from rechnomat.command.create_customer import CreateCustomerCommand
+from rechnomat.command.create_invoice import CreateInvoiceCommand
+from rechnomat.command.info import InfoCommand
 from rechnomat.model import Context
 from rechnomat.theme import StyleId, theme
 
@@ -62,7 +64,31 @@ def cli(
         config_file=config_file,
     )
 
-    ctx.obj["config"] = config.load(config_file)
+    # ctx.obj["config"] = config.load(config_file)
+
+
+@cli.command(section=SECTION_MAIN)
+@argument("customer-name", help="Name for the new customer file and its initial `name:` value")
+@help_option(help="Show this message")
+@pass_obj
+def create_customer(obj, customer_name):
+    """
+    Create a new customer YAML file
+    """
+    command = CreateCustomerCommand(customer_name=customer_name)
+    command.run(obj["context"])
+
+
+@cli.command(section=SECTION_MAIN)
+@argument("customer", help="Customer file this invoice is for (references customers/<customer>.yml)")
+@help_option(help="Show this message")
+@pass_obj
+def create_invoice(obj, customer):
+    """
+    Create a new invoice YAML file
+    """
+    command = CreateInvoiceCommand(customer=customer)
+    command.run(obj["context"])
 
 
 @cli.command(section=SECTION_UTILITY)

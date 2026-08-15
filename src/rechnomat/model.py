@@ -3,7 +3,7 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 @dataclass(slots=True)
@@ -30,7 +30,7 @@ class Address(BaseModel):
     street: str
     postcode: str
     city: str
-    country_code: str = Field(pattern=r"^[A-Z]{2}$")  # ISO 3166-1 alpha-2, EN 16931 BT-55
+    country_code: str = Field(pattern=r"^[A-Z]{2}$", description="ISO 3166-1 alpha-2, EN 16931 BT-55")
 
 
 class Contact(BaseModel):
@@ -43,10 +43,34 @@ class Customer(BaseModel):
     name: str
     legal_form: str | None = None
     address: Address
-    vat_id: str | None = None  # Ust-IdNr., EN 16931 BT-48
+    vat_id: str | None = Field(default=None, description="Ust-IdNr., EN 16931 BT-48")
     contact: Contact
     payment_terms_days: int
     notes: str | None = None
+
+
+class BankDetails(BaseModel):
+    iban: str  # EN 16931 BT-84
+    bic: str  # EN 16931 BT-86
+    bank_name: str
+
+
+class Seller(BaseModel):
+    name: str
+    legal_form: str | None = None
+    address: Address
+    vat_id: str | None = None  # Ust-IdNr., EN 16931 BT-31
+    tax_number: str | None = None  # Steuernummer, EN 16931 BT-32
+    trade_register: str | None = None  # e.g. "Amtsgericht München, HRB 123456"; EN 16931 BT-30
+    contact: Contact
+    bank_details: BankDetails
+
+    @model_validator(mode="after")
+    def _check_tax_identification(self) -> Seller:
+        # EN 16931 BR-CO-26: a seller must have a VAT identifier and/or a tax registration identifier.
+        if not self.vat_id and not self.tax_number:
+            raise ValueError("seller must have at least one of vat_id or tax_number")
+        return self
 
 
 class LineItem(BaseModel):

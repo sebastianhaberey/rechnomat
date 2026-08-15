@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from rechnomat.model import Address, Customer, Invoice
+from rechnomat.model import Address, Customer, Invoice, Seller
 
 VALID_CUSTOMER = {
     "name": "ACME GmbH",
@@ -21,6 +21,27 @@ VALID_CUSTOMER = {
         "phone": "+49 30 1234567",
     },
     "payment_terms_days": 14,
+}
+
+VALID_SELLER = {
+    "name": "Musterfirma Sebastian Haberey",
+    "address": {
+        "street": "Beispielweg 5",
+        "postcode": "80331",
+        "city": "München",
+        "country_code": "DE",
+    },
+    "vat_id": "DE987654321",
+    "contact": {
+        "name": "Sebastian Haberey",
+        "email": "sebastian@haberey.com",
+        "phone": "+49 89 1234567",
+    },
+    "bank_details": {
+        "iban": "DE02120300000000202051",
+        "bic": "BYLADEM1001",
+        "bank_name": "Deutsche Kreditbank",
+    },
 }
 
 VALID_INVOICE = {
@@ -85,3 +106,23 @@ def test_invoice_requires_line_items():
 def test_invoice_due_date_is_optional():
     invoice = Invoice.model_validate({k: v for k, v in VALID_INVOICE.items() if k != "due_date"})
     assert invoice.due_date is None
+
+
+def test_seller_parses_valid_data():
+    seller = Seller.model_validate(VALID_SELLER)
+    assert seller.name == "Musterfirma Sebastian Haberey"
+    assert seller.bank_details.iban == "DE02120300000000202051"
+    assert seller.trade_register is None
+
+
+def test_seller_accepts_tax_number_instead_of_vat_id():
+    without_vat_id = {k: v for k, v in VALID_SELLER.items() if k != "vat_id"}
+    seller = Seller.model_validate({**without_vat_id, "tax_number": "143/815/08154"})
+    assert seller.vat_id is None
+    assert seller.tax_number == "143/815/08154"
+
+
+def test_seller_requires_vat_id_or_tax_number():
+    without_vat_id = {k: v for k, v in VALID_SELLER.items() if k != "vat_id"}
+    with pytest.raises(ValidationError):
+        Seller.model_validate(without_vat_id)
