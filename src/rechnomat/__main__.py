@@ -5,6 +5,7 @@ import rechnomat.cli
 from rechnomat import ui
 from rechnomat.cli import cli
 
+
 def main():
     args = sys.argv[1:]
     if render_newlines(args):

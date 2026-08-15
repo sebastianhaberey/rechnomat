@@ -18,6 +18,7 @@ authors = [
 dependencies = [
     "click==8.4.2",
     "cloup==3.1.0",
+    "pydantic==2.13.4",
     "rich==15.0.0",
 ]
 
