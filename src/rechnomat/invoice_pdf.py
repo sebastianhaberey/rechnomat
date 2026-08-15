@@ -49,6 +49,8 @@ COL_PRICE_X = LEFT_MARGIN + 125 * mm
 COL_VAT_X = LEFT_MARGIN + 145 * mm
 COL_AMOUNT_X = CONTENT_RIGHT
 
+DESC_COL_GAP = 5 * mm
+
 
 def render_invoice_pdf(*, invoice: Invoice, customer: Customer, seller: Seller, output_path: Path) -> None:
     """
@@ -196,13 +198,21 @@ def _draw_line_items_table(cursor: _Cursor, invoice: Invoice, totals: InvoiceTot
     canvas.setFont(FONT_REGULAR, BODY_FONT_SIZE)
     for line in totals.line_amounts:
         item = line.item
-        canvas.drawString(COL_DESC_X, cursor.y, item.description)
         quantity_text = f"{format_decimal_de(item.quantity)} {item.unit}"
+        quantity_width = stringWidth(quantity_text, FONT_REGULAR, BODY_FONT_SIZE)
+        desc_max_width = COL_QTY_X - COL_DESC_X - quantity_width - DESC_COL_GAP
+        desc_lines = wrap_text(item.description, font=FONT_REGULAR, size=BODY_FONT_SIZE, max_width=desc_max_width)
+
+        canvas.drawString(COL_DESC_X, cursor.y, desc_lines[0])
         canvas.drawRightString(COL_QTY_X, cursor.y, quantity_text)
         canvas.drawRightString(COL_PRICE_X, cursor.y, format_amount(item.unit_price_net, invoice.currency))
         canvas.drawRightString(COL_VAT_X, cursor.y, format_percent(item.vat_rate))
         canvas.drawRightString(COL_AMOUNT_X, cursor.y, format_amount(line.net_amount, invoice.currency))
         cursor.y -= LINE_HEIGHT
+
+        for desc_line in desc_lines[1:]:
+            canvas.drawString(COL_DESC_X, cursor.y, desc_line)
+            cursor.y -= LINE_HEIGHT
 
     canvas.line(LEFT_MARGIN, cursor.y + 2 * mm, CONTENT_RIGHT, cursor.y + 2 * mm)
 
