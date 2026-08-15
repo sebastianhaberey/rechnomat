@@ -28,14 +28,13 @@ a valid e-invoice.
   governs for tax purposes — so correctness of the XML fields matters more than visual polish.
 - **PDF/A-3 is mandatory for the container**, not just "any PDF with an attachment." Fonts must be embedded, no
   disallowed color spaces/encryption, correct XMP metadata declaring the ZUGFeRD/Factur-X relationship.
-- **Cross-platform**: must run on both macOS and Linux. Flag any system-level (non-pip) dependency explicitly (e.g.
-  WeasyPrint needs Pango/Cairo/GDK-PixBuf installed via Homebrew or apt).
+- **Cross-platform**: must run on both macOS and Linux. Flag any system-level (non-pip) dependency explicitly.
 - Libraries are not guaranteed to produce standards-compliant output by themselves — always validate generated files,
   don't assume correctness.
 
 ## Suggested stack
 
-- PDF content rendering: `weasyprint` or `reportlab`
+- PDF content rendering: `reportlab`
 - PDF merging (background + content): `pypdf`
 - EN 16931 XML modeling: `drafthorse`
 - XML embedding + PDF/A-3 conversion: `factur-x`
