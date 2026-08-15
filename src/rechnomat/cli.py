@@ -1,13 +1,14 @@
 import logging
-import os
 from pathlib import Path
 
 import cloup
-from click import Choice, help_option, pass_obj, version_option
-from cloup import HelpFormatter, HelpTheme, Section, argument, group, option, pass_context
+from click import help_option, pass_obj, version_option
+from cloup import HelpFormatter, HelpTheme, Section, group, option, pass_context
 
-import rechnomat
-from rechnomat.theme import theme, StyleId
+from command.info import InfoCommand
+from rechnomat import config
+from rechnomat.model import Context
+from rechnomat.theme import StyleId, theme
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ SECTION_UTILITY = Section("Utility commands")
 DEBUG_MODE: bool = False
 
 
-@group(help="Rechnomat", context_settings=CONTEXT_SETTINGS)
+@group(help="Rechnomat - create invoices compliant with German E-Rechnung laws", context_settings=CONTEXT_SETTINGS)
 @help_option(help="Show this page")
 @version_option(prog_name="Rechnomat", help="Show version information", message="%(prog)s version %(version)s")
 @option(
@@ -43,8 +44,8 @@ DEBUG_MODE: bool = False
 )
 @pass_context
 def cli(
-        ctx: cloup.Context,
-        debug: bool,
+    ctx: cloup.Context,
+    debug: bool,
 ) -> None:
     # first, set DEBUG_MODE flag to enable stacktraces
     global DEBUG_MODE
@@ -52,9 +53,24 @@ def cli(
 
     ctx.ensure_object(dict)
 
-    rechnomat_executable = ctx.obj.pop("rechnomat_executable", None)  # move info from Click context to aplication context
+    config_file = Path.cwd() / "rechnomat.toml"
+    rechnomat_executable = ctx.obj.pop("rechnomat_executable", None)
 
-    context = rechnomat.context.create(
+    ctx.obj["context"] = Context(
         debug=debug,
+        rechnomat_executable=rechnomat_executable,
+        config_file=config_file,
     )
-    ctx.obj["context"] = context
+
+    ctx.obj["config"] = config.load(config_file)
+
+
+@cli.command(section=SECTION_UTILITY)
+@help_option(help="Show this message")
+@pass_obj
+def info(obj):
+    """
+    Show current configuration, paths etc.
+    """
+    command = InfoCommand(config=obj["config"])
+    command.run(obj["context"])
