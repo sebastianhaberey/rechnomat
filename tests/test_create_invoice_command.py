@@ -23,9 +23,9 @@ def test_create_invoice_writes_first_invoice_with_default_width(tmp_path, monkey
 
     CreateInvoiceCommand(customer="acme-gmbh").run(context)
 
-    target = tmp_path / "invoices" / "0000001.yml"
+    target = tmp_path / "invoices" / "00000001.yml"
     content = target.read_text(encoding="utf-8")
-    assert content.startswith('invoice_number: "0000001"\ncustomer: "acme-gmbh"\n')
+    assert content.startswith('invoice_number: "00000001"\ncustomer: "acme-gmbh"\n')
 
 
 def test_create_invoice_increments_highest_existing_number(tmp_path, monkeypatch, context):
@@ -33,11 +33,11 @@ def test_create_invoice_increments_highest_existing_number(tmp_path, monkeypatch
     _create_customer(tmp_path, "acme-gmbh")
     invoices_dir = tmp_path / "invoices"
     invoices_dir.mkdir()
-    (invoices_dir / "0000005.yml").touch()
+    (invoices_dir / "00000005.yml").touch()
 
     CreateInvoiceCommand(customer="acme-gmbh").run(context)
 
-    assert (invoices_dir / "0000006.yml").exists()
+    assert (invoices_dir / "00000006.yml").exists()
 
 
 def test_create_invoice_refuses_for_unknown_customer(tmp_path, monkeypatch, context):

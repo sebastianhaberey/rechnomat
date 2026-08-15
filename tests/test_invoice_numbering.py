@@ -2,17 +2,17 @@ from rechnomat.invoice_numbering import next_invoice_number
 
 
 def test_next_invoice_number_with_missing_directory(tmp_path):
-    assert next_invoice_number(tmp_path / "invoices") == "0000001"
+    assert next_invoice_number(tmp_path / "invoices") == "00000001"
 
 
 def test_next_invoice_number_with_empty_directory(tmp_path):
-    assert next_invoice_number(tmp_path) == "0000001"
+    assert next_invoice_number(tmp_path) == "00000001"
 
 
 def test_next_invoice_number_increments_and_preserves_width(tmp_path):
-    (tmp_path / "0000000.yml").touch()
-    (tmp_path / "0000001.yml").touch()
-    assert next_invoice_number(tmp_path) == "0000002"
+    (tmp_path / "00000000.yml").touch()
+    (tmp_path / "00000001.yml").touch()
+    assert next_invoice_number(tmp_path) == "00000002"
 
 
 def test_next_invoice_number_uses_width_of_highest_file(tmp_path):

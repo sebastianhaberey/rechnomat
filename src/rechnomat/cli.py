@@ -5,9 +5,9 @@ import cloup
 from click import help_option, pass_obj, version_option
 from cloup import HelpFormatter, HelpTheme, Section, argument, group, option, pass_context
 
-from rechnomat import config
 from rechnomat.command.create_customer import CreateCustomerCommand
 from rechnomat.command.create_invoice import CreateInvoiceCommand
+from rechnomat.command.create_seller import CreateSellerCommand
 from rechnomat.command.info import InfoCommand
 from rechnomat.model import Context
 from rechnomat.theme import StyleId, theme
@@ -76,6 +76,17 @@ def create_customer(obj, customer_name):
     Create a new customer YAML file
     """
     command = CreateCustomerCommand(customer_name=customer_name)
+    command.run(obj["context"])
+
+
+@cli.command(section=SECTION_MAIN)
+@help_option(help="Show this message")
+@pass_obj
+def create_seller(obj):
+    """
+    Create the seller YAML file
+    """
+    command = CreateSellerCommand()
     command.run(obj["context"])
 
 

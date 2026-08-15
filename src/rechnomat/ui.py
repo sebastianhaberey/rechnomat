@@ -129,11 +129,11 @@ def progress(func: Callable[[], Iterator[ProgressEvent]], *, message: str = "Pro
         return
 
     with Progress(
-            BarColumn(bar_width=10),
-            TimeRemainingColumn(),
-            TextColumn("{task.description}"),
-            console=console,
-            transient=True,
+        BarColumn(bar_width=10),
+        TimeRemainingColumn(),
+        TextColumn("{task.description}"),
+        console=console,
+        transient=True,
     ) as p:
         task_id = p.add_task(message, start=True)
         for event in func():
@@ -156,10 +156,10 @@ def spinner(func: Callable[[], Iterator[ProgressEvent]], *, message: str = "Proc
         return
 
     with Progress(
-            SpinnerColumn(style=STYLES[StyleId.PRIMARY]),
-            TextColumn("{task.description}"),
-            console=console,
-            transient=True,
+        SpinnerColumn(style=STYLES[StyleId.PRIMARY]),
+        TextColumn("{task.description}"),
+        console=console,
+        transient=True,
     ) as p:
         task_id = p.add_task(message, total=None)
         for event in func():
@@ -171,11 +171,11 @@ def is_tty() -> bool:
 
 
 def table(
-        rows: Iterable[Sequence[str | object]],
-        *,
-        headers: Sequence[str] | None = None,
-        column_colors: Sequence[str | None] = (),
-        box=box.SIMPLE_HEAD,
+    rows: Iterable[Sequence[str | object]],
+    *,
+    headers: Sequence[str] | None = None,
+    column_colors: Sequence[str | None] = (),
+    box=box.SIMPLE_HEAD,
 ) -> None:
     """
     Print a table to the console using Rich.
