@@ -42,6 +42,7 @@ FONT_BOLD = "Helvetica-Bold"
 BODY_FONT_SIZE = 10
 SMALL_FONT_SIZE = 7
 LINE_HEIGHT = 4.5 * mm
+ITEM_GAP = 1.0 * mm
 
 COL_DESC_X = LEFT_MARGIN
 COL_QTY_X = LEFT_MARGIN + 95 * mm
@@ -209,7 +210,9 @@ def _draw_line_items_table(cursor: _Cursor, invoice: Invoice, totals: InvoiceTot
             canvas.drawString(COL_DESC_X, cursor.y, desc_line)
             cursor.y -= LINE_HEIGHT
 
-    canvas.line(LEFT_MARGIN, cursor.y + 2 * mm, CONTENT_RIGHT, cursor.y + 2 * mm)
+        cursor.y -= ITEM_GAP
+
+    canvas.line(LEFT_MARGIN, cursor.y + 2 * mm + ITEM_GAP, CONTENT_RIGHT, cursor.y + 2 * mm + ITEM_GAP)
 
 
 def _draw_totals(cursor: _Cursor, totals: InvoiceTotals, currency: str) -> None:
