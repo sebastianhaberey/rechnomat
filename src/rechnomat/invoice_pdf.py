@@ -151,10 +151,6 @@ def _draw_body(canvas: Canvas, *, invoice: Invoice, seller: Seller) -> None:
     cursor = _Cursor(canvas=canvas, y=_y_from_top(BODY_TOP))
 
     cursor.text(f"Rechnung Nr. {invoice.invoice_number}", font=FONT_BOLD, size=11)
-    cursor.gap()
-    cursor.text("Sehr geehrte Damen und Herren,")
-    cursor.gap()
-    cursor.text("für die von uns erbrachten Leistungen erlauben wir uns, wie folgt zu berechnen:")
     cursor.gap(LINE_HEIGHT * 1.5)
 
     totals = compute_totals(invoice)
@@ -165,8 +161,7 @@ def _draw_body(canvas: Canvas, *, invoice: Invoice, seller: Seller) -> None:
 
     due_clause = f" bis zum {format_date_de(invoice.due_date)}" if invoice.due_date else ""
     cursor.text(
-        f"Bitte überweisen Sie den Rechnungsbetrag{due_clause} unter Angabe der Rechnungsnummer "
-        f"{invoice.invoice_number} auf folgendes Konto:"
+        f"Bitte überweisen Sie den Rechnungsbetrag{due_clause} unter Angabe der Rechnungsnummer auf folgendes Konto:"
     )
     cursor.gap(LINE_HEIGHT * 0.5)
     cursor.text(f"{seller.bank_details.bank_name}, IBAN {seller.bank_details.iban}, BIC {seller.bank_details.bic}")
