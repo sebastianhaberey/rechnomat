@@ -24,7 +24,7 @@ VALID_CUSTOMER = {
 }
 
 VALID_SELLER = {
-    "name": "Musterfirma Sebastian Haberey",
+    "name": "Musterfirma Max Mustermann",
     "address": {
         "street": "Beispielweg 5",
         "postcode": "80331",
@@ -33,8 +33,8 @@ VALID_SELLER = {
     },
     "vat_id": "DE987654321",
     "contact": {
-        "name": "Sebastian Haberey",
-        "email": "sebastian@haberey.com",
+        "name": "Max Mustermann",
+        "email": "max.mustermann@musterfirma.example",
         "phone": "+49 89 1234567",
     },
     "bank_details": {
@@ -110,7 +110,7 @@ def test_invoice_due_date_is_optional():
 
 def test_seller_parses_valid_data():
     seller = Seller.model_validate(VALID_SELLER)
-    assert seller.name == "Musterfirma Sebastian Haberey"
+    assert seller.name == "Musterfirma Max Mustermann"
     assert seller.bank_details.iban == "DE02120300000000202051"
     assert seller.trade_register is None
 
