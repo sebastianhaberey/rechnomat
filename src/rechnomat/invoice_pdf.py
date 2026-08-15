@@ -171,11 +171,6 @@ def _draw_body(canvas: Canvas, *, invoice: Invoice, seller: Seller) -> None:
         cursor.gap()
         cursor.text(invoice.notes)
 
-    cursor.gap(LINE_HEIGHT * 1.5)
-    cursor.text("Mit freundlichen Grüßen")
-    cursor.gap(LINE_HEIGHT * 2)
-    cursor.text(seller.name)
-
 
 def _draw_line_items_table(cursor: _Cursor, invoice: Invoice, totals: InvoiceTotals) -> None:
     canvas = cursor.canvas
