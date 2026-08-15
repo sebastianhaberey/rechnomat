@@ -1,5 +1,5 @@
 from rechnomat import ui
-from rechnomat.model import Config, Context
+from rechnomat.model import Context
 from rechnomat.theme import StyleId, theme
 
 STYLES = theme().styles

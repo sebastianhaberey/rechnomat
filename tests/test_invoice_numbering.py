@@ -57,3 +57,31 @@ def test_find_highest_invoice_number_ignores_non_numeric_filenames(tmp_path):
     (tmp_path / "abc.yml").touch()
     (tmp_path / "00000003.yml").touch()
     assert find_highest_invoice_number(tmp_path) == "00000003"
+
+
+def test_next_invoice_number_preserves_non_digit_prefix(tmp_path):
+    (tmp_path / "DE-1000.yml").touch()
+    assert next_invoice_number(tmp_path) == "DE-1001"
+
+
+def test_next_invoice_number_grows_width_with_prefix_on_overflow(tmp_path):
+    (tmp_path / "DE-9999.yml").touch()
+    assert next_invoice_number(tmp_path) == "DE-10000"
+
+
+def test_next_invoice_number_picks_prefixed_number_by_value_not_string_order(tmp_path):
+    (tmp_path / "DE-0009.yml").touch()
+    (tmp_path / "DE-0010.yml").touch()
+    assert next_invoice_number(tmp_path) == "DE-0011"
+
+
+def test_find_highest_invoice_number_preserves_prefix_and_padding(tmp_path):
+    (tmp_path / "DE-0005.yml").touch()
+    (tmp_path / "DE-0012.yml").touch()
+    assert find_highest_invoice_number(tmp_path) == "DE-0012"
+
+
+def test_find_highest_invoice_number_ignores_filenames_with_digits_in_prefix(tmp_path):
+    (tmp_path / "2024-DE-1000.yml").touch()
+    (tmp_path / "DE-0003.yml").touch()
+    assert find_highest_invoice_number(tmp_path) == "DE-0003"
