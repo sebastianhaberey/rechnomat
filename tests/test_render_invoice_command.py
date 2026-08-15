@@ -123,3 +123,12 @@ def test_render_invoice_raises_when_seller_file_missing(tmp_path, monkeypatch, c
 
     with pytest.raises(RuntimeError, match="Seller file not found"):
         RenderInvoiceCommand(invoice_number="00000001").run(context)
+
+
+def test_render_invoice_raises_when_file_name_does_not_match_invoice_number(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(tmp_path)
+    (tmp_path / "invoices" / "00000001.yml").rename(tmp_path / "invoices" / "00000002.yml")
+
+    with pytest.raises(RuntimeError, match="Invoice number mismatch"):
+        RenderInvoiceCommand(invoice_number="00000002").run(context)
