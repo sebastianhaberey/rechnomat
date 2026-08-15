@@ -3,12 +3,12 @@ from pathlib import Path
 import pytest
 
 from rechnomat.command.create_invoice import CreateInvoiceCommand
-from rechnomat.model import Context
+from rechnomat.model import Context, Paths
 
 
 @pytest.fixture
 def context(tmp_path) -> Context:
-    return Context(debug=False, rechnomat_executable=Path("rechnomat"), config_file=tmp_path / "rechnomat.toml")
+    return Context(debug=False, rechnomat_executable=Path("rechnomat"), paths=Paths(root=tmp_path))
 
 
 def _create_customer(cwd: Path, customer: str) -> None:

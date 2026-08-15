@@ -6,11 +6,45 @@ from pathlib import Path
 from pydantic import BaseModel, Field, model_validator
 
 
+@dataclass(frozen=True, slots=True)
+class Paths:
+    root: Path
+
+    @property
+    def config_file(self) -> Path:
+        return self.root / "rechnomat.toml"
+
+    @property
+    def customers_dir(self) -> Path:
+        return self.root / "customers"
+
+    @property
+    def seller_dir(self) -> Path:
+        return self.root / "seller"
+
+    @property
+    def seller_file(self) -> Path:
+        return self.seller_dir / "seller.yml"
+
+    @property
+    def invoices_dir(self) -> Path:
+        return self.root / "invoices"
+
+    def customer_file(self, customer_name: str) -> Path:
+        return self.customers_dir / f"{customer_name}.yml"
+
+    def invoice_file(self, invoice_number: str) -> Path:
+        return self.invoices_dir / f"{invoice_number}.yml"
+
+    def invoice_pdf_file(self, invoice_number: str) -> Path:
+        return self.invoices_dir / f"{invoice_number}.pdf"
+
+
 @dataclass(slots=True)
 class Context:
     debug: bool
     rechnomat_executable: Path
-    config_file: Path
+    paths: Paths
 
 
 @dataclass(frozen=True, slots=True)

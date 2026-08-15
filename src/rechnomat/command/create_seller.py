@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from rechnomat import ui
 from rechnomat.model import Context, Seller
 from rechnomat.scaffold import render_scaffold
@@ -7,8 +5,8 @@ from rechnomat.scaffold import render_scaffold
 
 class CreateSellerCommand:
     def run(self, context: Context) -> None:
-        seller_dir = Path.cwd() / "seller"
-        target_file = seller_dir / "seller.yml"
+        seller_dir = context.paths.seller_dir
+        target_file = context.paths.seller_file
 
         if target_file.exists():
             raise RuntimeError(f"Seller file already exists: {target_file}")

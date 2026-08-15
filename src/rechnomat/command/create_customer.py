@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from rechnomat import ui
 from rechnomat.model import Context, Customer
 from rechnomat.scaffold import render_scaffold
@@ -11,8 +9,8 @@ class CreateCustomerCommand:
         self.customer_name = customer_name
 
     def run(self, context: Context) -> None:
-        customers_dir = Path.cwd() / "customers"
-        target_file = customers_dir / f"{self.customer_name}.yml"
+        customers_dir = context.paths.customers_dir
+        target_file = context.paths.customer_file(self.customer_name)
 
         if target_file.exists():
             raise RuntimeError(f"Customer file already exists: {target_file}")

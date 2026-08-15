@@ -6,15 +6,15 @@ STYLES = theme().styles
 
 
 class InfoCommand:
-    def __init__(self, *, config: Config) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.config = config
 
     def run(self, context: Context) -> None:
         rows = [
             ("rechnomat executable", context.rechnomat_executable),
-            ("foo", self.config.foo),
-            ("bar", self.config.bar),
+            ("seller dir", context.paths.seller_dir),
+            ("customers dir", context.paths.customers_dir),
+            ("invoices dir", context.paths.invoices_dir),
         ]
         ui.header("Configuration", first=True)
         ui.table(

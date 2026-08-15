@@ -9,7 +9,8 @@ from rechnomat.command.create_customer import CreateCustomerCommand
 from rechnomat.command.create_invoice import CreateInvoiceCommand
 from rechnomat.command.create_seller import CreateSellerCommand
 from rechnomat.command.info import InfoCommand
-from rechnomat.model import Context
+from rechnomat.command.render_invoice import RenderInvoiceCommand
+from rechnomat.model import Context, Paths
 from rechnomat.theme import StyleId, theme
 
 logger = logging.getLogger(__name__)
@@ -55,16 +56,14 @@ def cli(
 
     ctx.ensure_object(dict)
 
-    config_file = Path.cwd() / "rechnomat.toml"
+    paths = Paths(root=Path.cwd())
     rechnomat_executable = ctx.obj.pop("rechnomat_executable", None)
 
     ctx.obj["context"] = Context(
         debug=debug,
         rechnomat_executable=rechnomat_executable,
-        config_file=config_file,
+        paths=paths,
     )
-
-    # ctx.obj["config"] = config.load(config_file)
 
 
 @cli.command(section=SECTION_MAIN)
@@ -102,6 +101,22 @@ def create_invoice(obj, customer):
     command.run(obj["context"])
 
 
+@cli.command(section=SECTION_MAIN, name="render-invoice")
+@argument(
+    "invoice-number",
+    required=False,
+    help="Invoice number to render (defaults to the highest-numbered invoice in invoices/)",
+)
+@help_option(help="Show this message")
+@pass_obj
+def render_invoice(obj, invoice_number):
+    """
+    Render an invoice as a PDF
+    """
+    command = RenderInvoiceCommand(invoice_number=invoice_number)
+    command.run(obj["context"])
+
+
 @cli.command(section=SECTION_UTILITY)
 @help_option(help="Show this message")
 @pass_obj
@@ -109,5 +124,5 @@ def info(obj):
     """
     Show current configuration, paths etc.
     """
-    command = InfoCommand(config=obj["config"])
+    command = InfoCommand()
     command.run(obj["context"])
