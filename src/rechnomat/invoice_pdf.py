@@ -152,24 +152,31 @@ def _draw_body(canvas: Canvas, *, invoice: Invoice, seller: Seller) -> None:
     cursor = _Cursor(canvas=canvas, y=_y_from_top(BODY_TOP))
 
     cursor.text(f"Rechnung Nr. {invoice.invoice_number}", font=FONT_BOLD, size=11)
+
     cursor.gap(LINE_HEIGHT * 1.5)
 
     totals = compute_totals(invoice)
     _draw_line_items_table(cursor, invoice, totals)
     cursor.gap()
     _draw_totals(cursor, totals, invoice.currency)
-    cursor.gap(LINE_HEIGHT * 1.5)
+
+    if invoice.notes:
+        cursor.gap()
+        cursor.text(invoice.notes)
+
+    cursor.gap(LINE_HEIGHT * 0.5)
 
     due_clause = f" bis zum {format_date_de(invoice.due_date)}" if invoice.due_date else ""
     cursor.text(
         f"Bitte überweisen Sie den Rechnungsbetrag{due_clause} unter Angabe der Rechnungsnummer auf folgendes Konto:"
     )
-    cursor.gap(LINE_HEIGHT * 0.5)
-    cursor.text(f"{seller.bank_details.bank_name}, IBAN {seller.bank_details.iban}, BIC {seller.bank_details.bic}")
 
-    if invoice.notes:
-        cursor.gap()
-        cursor.text(invoice.notes)
+    cursor.gap(LINE_HEIGHT * 0.5)
+
+    cursor.text(seller.bank_details.account_owner)
+    cursor.text(seller.bank_details.bank_name)
+    cursor.text(f"IBAN {seller.bank_details.iban}")
+    cursor.text(f"BIC {seller.bank_details.bic}")
 
 
 def _draw_line_items_table(cursor: _Cursor, invoice: Invoice, totals: InvoiceTotals) -> None:

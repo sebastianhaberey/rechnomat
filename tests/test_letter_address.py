@@ -13,7 +13,12 @@ SELLER = {
     "address": {"street": "Beispielweg 5", "postcode": "80331", "city": "Muenchen", "country_code": "DE"},
     "vat_id": "DE987654321",
     "contact": {"name": "Max Mustermann", "email": "max@musterfirma.example", "phone": "+49 89 1234567"},
-    "bank_details": {"iban": "DE02120300000000202051", "bic": "BYLADEM1001", "bank_name": "Deutsche Kreditbank"},
+    "bank_details": {
+        "account_owner": "Musterfirma Max Mustermann",
+        "iban": "DE02120300000000202051",
+        "bic": "BYLADEM1001",
+        "bank_name": "Deutsche Kreditbank",
+    },
 }
 
 

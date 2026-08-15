@@ -84,6 +84,7 @@ class Customer(BaseModel):
 
 
 class BankDetails(BaseModel):
+    account_owner: str
     iban: str = Field(description="EN 16931 BT-84")
     bic: str = Field(description="EN 16931 BT-86")
     bank_name: str

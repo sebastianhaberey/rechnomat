@@ -38,6 +38,7 @@ VALID_SELLER = {
         "phone": "+49 89 1234567",
     },
     "bank_details": {
+        "account_owner": "Musterfirma Max Mustermann",
         "iban": "DE02120300000000202051",
         "bic": "BYLADEM1001",
         "bank_name": "Deutsche Kreditbank",
@@ -111,6 +112,7 @@ def test_invoice_due_date_is_optional():
 def test_seller_parses_valid_data():
     seller = Seller.model_validate(VALID_SELLER)
     assert seller.name == "Musterfirma Max Mustermann"
+    assert seller.bank_details.account_owner == "Musterfirma Max Mustermann"
     assert seller.bank_details.iban == "DE02120300000000202051"
     assert seller.trade_register is None
 

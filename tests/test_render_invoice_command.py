@@ -32,6 +32,7 @@ contact:
   email: "max@musterfirma.example"
   phone: "+49 89 1234567"
 bank_details:
+  account_owner: "Musterfirma Max Mustermann"
   iban: "DE02120300000000202051"
   bic: "BYLADEM1001"
   bank_name: "Deutsche Kreditbank"
