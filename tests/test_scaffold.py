@@ -9,19 +9,19 @@ from rechnomat.scaffold import render_scaffold
 
 EXPECTED_CUSTOMER_SCAFFOLD = """\
 name: ""
-# legal_form: ""
+legal_form: ""
 address:
   street: ""
   postcode: ""
   city: ""
   country_code: ""  # ISO 3166-1 alpha-2, EN 16931 BT-55
-# vat_id: ""  # Ust-IdNr., EN 16931 BT-48
+vat_id: ""  # Ust-IdNr., EN 16931 BT-48
 contact:
   name: ""
   email: ""
   phone: ""
 payment_terms_days: 0
-# notes: ""
+notes: ""
 """
 
 
@@ -45,19 +45,19 @@ def test_render_scaffold_for_invoice_model():
     result = render_scaffold(Invoice, overrides={"invoice_number": "0000123", "customer": "acme-gmbh"})
     today = date.today().isoformat()
     assert result == (
-        'invoice_number: "0000123"\n'
-        'customer: "acme-gmbh"\n'
-        f"issue_date: {today}\n"
-        f"# due_date: {today}\n"
-        'currency: ""\n'
-        '# buyer_reference: ""\n'
-        "line_items:\n"
+        'invoice_number: "0000123"  # EN 16931 BT-1\n'
+        'customer: "acme-gmbh"  # references a Customer file by its filename stem\n'
+        f"issue_date: {today}  # EN 16931 BT-2\n"
+        f"due_date: {today}\n"
+        'currency: ""  # ISO 4217, EN 16931 BT-5\n'
+        'buyer_reference: ""  # EN 16931 BT-10\n'
+        "line_items:  # EN 16931 BG-25\n"
         '  - description: ""\n'
         '    quantity: "0"\n'
-        '    unit: ""\n'
+        '    unit: ""  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"\n'
         '    unit_price_net: "0"\n'
-        '    vat_rate: "0"\n'
-        '# notes: ""\n'
+        '    vat_rate: "0"  # percent\n'
+        'notes: ""  # EN 16931 BT-22\n'
     )
 
 
@@ -131,4 +131,4 @@ def test_render_scaffold_omits_comment_when_description_absent():
         optional_field: int | None = Field(default=None)
 
     result = render_scaffold(Plain)
-    assert result == "required_field: 0\n# optional_field: 0\n"
+    assert result == "required_field: 0\noptional_field: 0\n"

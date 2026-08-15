@@ -17,7 +17,7 @@ def test_create_seller_writes_file_with_expected_content(tmp_path, monkeypatch, 
 
     content = (tmp_path / "seller" / "seller.yml").read_text(encoding="utf-8")
     assert content.startswith('name: ""\n')
-    assert '# legal_form: ""' in content
+    assert 'legal_form: ""' in content
 
 
 def test_create_seller_creates_seller_directory_if_missing(tmp_path, monkeypatch, context):

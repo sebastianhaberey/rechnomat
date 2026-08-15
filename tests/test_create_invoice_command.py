@@ -25,7 +25,7 @@ def test_create_invoice_writes_first_invoice_with_default_width(tmp_path, monkey
 
     target = tmp_path / "invoices" / "00000001.yml"
     content = target.read_text(encoding="utf-8")
-    assert content.startswith('invoice_number: "00000001"\ncustomer: "acme-gmbh"\n')
+    assert content.startswith('invoice_number: "00000001"  # EN 16931 BT-1\ncustomer: "acme-gmbh"')
 
 
 def test_create_invoice_increments_highest_existing_number(tmp_path, monkeypatch, context):

@@ -12,11 +12,11 @@ def render_scaffold(model: type[BaseModel], *, overrides: Mapping[str, str] | No
     """
     Render a YAML scaffold for `model` by introspecting its fields.
 
-    Required fields get a type-appropriate placeholder written directly; optional fields (those with a
-    default) are emitted as a commented-out line. Field(description=...) metadata is rendered as a
-    trailing `# ...` comment. `overrides` may supply literal string values for top-level field names,
-    used verbatim instead of the placeholder (e.g. pre-filling `name:` with a user-supplied value).
-    A `list[BaseModel]` field is rendered as a single example item under a `- ` marker.
+    Every field, required or optional, is written directly with a type-appropriate placeholder value.
+    Field(description=...) metadata is rendered as a trailing `# ...` comment describing the field for
+    the user filling out the file. `overrides` may supply literal string values for top-level field
+    names, used verbatim instead of the placeholder (e.g. pre-filling `name:` with a user-supplied
+    value). A `list[BaseModel]` field is rendered as a single example item under a `- ` marker.
     """
     lines = _render_model_fields(model, indent=0, overrides=overrides or {})
     return "\n".join(lines) + "\n"
@@ -32,9 +32,8 @@ def _render_model_fields(model: type[BaseModel], *, indent: int, overrides: Mapp
 def _render_field(name: str, field_info: FieldInfo, *, indent: int, override: str | None) -> list[str]:
     prefix = " " * indent
     required = field_info.is_required()
-    annotation = field_info.annotation
     comment = f"  # {field_info.description}" if field_info.description else ""
-    resolved_type = annotation if required else _unwrap_optional(annotation)
+    resolved_type = _unwrap_optional(field_info.annotation)
 
     if isinstance(resolved_type, type) and issubclass(resolved_type, BaseModel):
         if not required:
@@ -53,8 +52,7 @@ def _render_field(name: str, field_info: FieldInfo, *, indent: int, override: st
         return _render_list_field(name, resolved_type, indent=indent, comment=comment)
 
     value = _quote_str(override) if override is not None else _placeholder_for(resolved_type)
-    line = f"{prefix}{name}: {value}{comment}"
-    return [line] if required else [f"{prefix}# {name}: {value}{comment}"]
+    return [f"{prefix}{name}: {value}{comment}"]
 
 
 def _render_list_field(name: str, list_type: Any, *, indent: int, comment: str) -> list[str]:
