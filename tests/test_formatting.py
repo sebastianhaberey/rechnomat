@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from rechnomat.formatting import format_amount, format_date_de, format_decimal_de, format_percent
+from rechnomat.formatting import format_amount, format_date_de, format_decimal_de, format_percent, format_unit_de
 
 
 def test_format_decimal_de_uses_comma_as_decimal_separator():
@@ -35,3 +35,12 @@ def test_format_percent_keeps_nonzero_decimals():
 
 def test_format_date_de_uses_german_day_month_year_order():
     assert format_date_de(date(2026, 8, 15)) == "15.08.2026"
+
+
+def test_format_unit_de_maps_known_unece_codes():
+    assert format_unit_de("HUR") == "Std."
+    assert format_unit_de("H87") == "Stk."
+
+
+def test_format_unit_de_falls_back_to_raw_code_for_unknown_unit():
+    assert format_unit_de("XYZ") == "XYZ"

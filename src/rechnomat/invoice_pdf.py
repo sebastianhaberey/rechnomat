@@ -7,7 +7,7 @@ from reportlab.lib.units import mm
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen.canvas import Canvas
 
-from rechnomat.formatting import format_amount, format_date_de, format_decimal_de, format_percent
+from rechnomat.formatting import format_amount, format_date_de, format_decimal_de, format_percent, format_unit_de
 from rechnomat.invoice_calc import InvoiceTotals, compute_totals
 from rechnomat.letter_address import build_address_lines, build_return_address_line
 from rechnomat.model import Customer, Invoice, Seller
@@ -193,7 +193,7 @@ def _draw_line_items_table(cursor: _Cursor, invoice: Invoice, totals: InvoiceTot
     canvas.setFont(FONT_REGULAR, BODY_FONT_SIZE)
     for line in totals.line_amounts:
         item = line.item
-        quantity_text = f"{format_decimal_de(item.quantity)} {item.unit}"
+        quantity_text = f"{format_decimal_de(item.quantity)} {format_unit_de(item.unit)}"
         quantity_width = stringWidth(quantity_text, FONT_REGULAR, BODY_FONT_SIZE)
         desc_max_width = COL_QTY_X - COL_DESC_X - quantity_width - DESC_COL_GAP
         desc_lines = wrap_text(item.description, font=FONT_REGULAR, size=BODY_FONT_SIZE, max_width=desc_max_width)

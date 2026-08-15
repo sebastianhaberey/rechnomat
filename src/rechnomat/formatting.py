@@ -3,6 +3,25 @@ from decimal import ROUND_HALF_UP, Decimal
 
 _CURRENCY_SYMBOLS = {"EUR": "€"}
 
+# German abbreviations for UN/ECE Recommendation 20 unit codes commonly used on invoices.
+_UNIT_LABELS_DE = {
+    "HUR": "Std.",
+    "DAY": "Tag",
+    "WEE": "Woche",
+    "MON": "Monat",
+    "ANN": "Jahr",
+    "H87": "Stk.",
+    "C62": "Stk.",
+    "EA": "Stk.",
+    "KGM": "kg",
+    "GRM": "g",
+    "MTR": "m",
+    "KMT": "km",
+    "LTR": "l",
+    "MTK": "m²",
+    "MTQ": "m³",
+}
+
 
 def format_decimal_de(value: Decimal, *, decimals: int = 2) -> str:
     """
@@ -33,6 +52,14 @@ def format_percent(value: Decimal) -> str:
     if text.endswith(",00"):
         text = text[:-3]
     return f"{text} %"
+
+
+def format_unit_de(unit_code: str) -> str:
+    """
+    Format a UN/ECE Recommendation 20 unit code as a human-readable German abbreviation, falling back
+    to the raw code for unknown units.
+    """
+    return _UNIT_LABELS_DE.get(unit_code, unit_code)
 
 
 def format_date_de(value: date) -> str:
