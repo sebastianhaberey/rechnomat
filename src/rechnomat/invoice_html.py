@@ -12,13 +12,15 @@ from rechnomat.model import Customer, Invoice, Seller
 _FONT_URL_RE = re.compile(r'url\("(fonts/[^"]+)"\)')
 
 
-def render_invoice_html(*, invoice: Invoice, customer: Customer, seller: Seller, templates_dir: Path) -> str:
+def render_invoice_html(
+    *, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller, templates_dir: Path
+) -> str:
     """
     Render `invoice` as a fully self-contained HTML string (CSS inlined, fonts embedded as base64
     data URIs) using the template.html + template.css found in `templates_dir`. Does no browser
     rendering - see invoice_pdf.render_invoice_pdf for the Playwright/PDF step.
     """
-    context = _build_context(invoice=invoice, customer=customer, seller=seller)
+    context = _build_context(invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller)
     context["inline_css"] = _read_css_with_embedded_fonts(templates_dir)
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(str(templates_dir)),
@@ -27,10 +29,11 @@ def render_invoice_html(*, invoice: Invoice, customer: Customer, seller: Seller,
     return env.get_template("template.html").render(**context)
 
 
-def _build_context(*, invoice: Invoice, customer: Customer, seller: Seller) -> dict:
+def _build_context(*, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller) -> dict:
     totals = compute_totals(invoice)
     return {
         "invoice": invoice,
+        "invoice_number": invoice_number,
         "return_address_line": build_return_address_line(seller),
         "address_lines": build_address_lines(customer),
         "issue_date_text": format_date_de(invoice.issue_date),

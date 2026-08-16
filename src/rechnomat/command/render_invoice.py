@@ -21,11 +21,6 @@ class RenderInvoiceCommand:
         if not invoice_file.exists():
             raise RuntimeError(f"Invoice file not found: {invoice_file}")
         invoice = load_model(invoice_file, Invoice)
-        if invoice.invoice_number != invoice_number:
-            raise RuntimeError(
-                f"Invoice number mismatch: file {invoice_file} contains invoice number "
-                f"'{invoice.invoice_number}', expected '{invoice_number}'"
-            )
 
         customer_file = context.paths.customer_file(invoice.customer)
         if not customer_file.exists():
@@ -43,7 +38,12 @@ class RenderInvoiceCommand:
 
         target_file = context.paths.invoice_pdf_file(invoice_number)
         render_invoice_pdf(
-            invoice=invoice, customer=customer, seller=seller, output_path=target_file, templates_dir=templates_dir
+            invoice=invoice,
+            invoice_number=invoice_number,
+            customer=customer,
+            seller=seller,
+            output_path=target_file,
+            templates_dir=templates_dir,
         )
 
         ui.success("Rendered invoice PDF", str(target_file))

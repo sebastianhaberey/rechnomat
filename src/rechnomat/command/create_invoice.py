@@ -20,7 +20,7 @@ class CreateInvoiceCommand:
         invoices_dir.mkdir(parents=True, exist_ok=True)
         target_file = context.paths.invoice_file(invoice_number)
         target_file.write_text(
-            render_scaffold(Invoice, overrides={"invoice_number": invoice_number, "customer": self.customer}),
+            render_scaffold(Invoice, overrides={"customer": self.customer}),
             encoding="utf-8",
         )
 

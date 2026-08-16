@@ -32,7 +32,6 @@ SELLER = Seller.model_validate(
 )
 
 BASE_INVOICE = {
-    "invoice_number": "00000001",
     "customer": "acme-gmbh",
     "issue_date": "2026-08-15",
     "currency": "EUR",
@@ -47,7 +46,12 @@ def test_render_invoice_pdf_writes_valid_pdf_file(tmp_path):
     output_path = tmp_path / "invoice.pdf"
 
     render_invoice_pdf(
-        invoice=invoice, customer=CUSTOMER, seller=SELLER, output_path=output_path, templates_dir=TEMPLATES_DIR
+        invoice=invoice,
+        invoice_number="00000001",
+        customer=CUSTOMER,
+        seller=SELLER,
+        output_path=output_path,
+        templates_dir=TEMPLATES_DIR,
     )
 
     assert output_path.read_bytes().startswith(b"%PDF-")
@@ -75,7 +79,12 @@ def test_render_invoice_pdf_handles_multiple_vat_rates_and_optional_fields(tmp_p
     output_path = tmp_path / "invoice.pdf"
 
     render_invoice_pdf(
-        invoice=invoice, customer=CUSTOMER, seller=SELLER, output_path=output_path, templates_dir=TEMPLATES_DIR
+        invoice=invoice,
+        invoice_number="00000001",
+        customer=CUSTOMER,
+        seller=SELLER,
+        output_path=output_path,
+        templates_dir=TEMPLATES_DIR,
     )
 
     assert output_path.read_bytes().startswith(b"%PDF-")
@@ -94,7 +103,12 @@ def test_render_invoice_pdf_handles_non_domestic_customer_address(tmp_path):
     output_path = tmp_path / "invoice.pdf"
 
     render_invoice_pdf(
-        invoice=invoice, customer=customer, seller=SELLER, output_path=output_path, templates_dir=TEMPLATES_DIR
+        invoice=invoice,
+        invoice_number="00000001",
+        customer=customer,
+        seller=SELLER,
+        output_path=output_path,
+        templates_dir=TEMPLATES_DIR,
     )
 
     assert output_path.read_bytes().startswith(b"%PDF-")
@@ -119,7 +133,12 @@ def test_render_invoice_pdf_paginates_when_content_overflows_a_single_page(tmp_p
     output_path = tmp_path / "invoice.pdf"
 
     render_invoice_pdf(
-        invoice=invoice, customer=CUSTOMER, seller=SELLER, output_path=output_path, templates_dir=TEMPLATES_DIR
+        invoice=invoice,
+        invoice_number="00000001",
+        customer=CUSTOMER,
+        seller=SELLER,
+        output_path=output_path,
+        templates_dir=TEMPLATES_DIR,
     )
 
     assert len(PdfReader(output_path).pages) > 1

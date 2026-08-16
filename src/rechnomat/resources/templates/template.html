@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Rechnung {{ invoice.invoice_number }}</title>
+<title>Rechnung {{ invoice_number }}</title>
 <style>{{ inline_css | safe }}</style>
 </head>
 <body>
@@ -22,7 +22,7 @@
     <div class="info-block">
         <div class="info-row">
             <div class="info-label">Rechnungsnummer</div>
-            <div class="info-value">{{ invoice.invoice_number }}</div>
+            <div class="info-value">{{ invoice_number }}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Rechnungsdatum</div>
@@ -44,7 +44,7 @@
 </div>
 
 <div class="body-content">
-    <h1>Rechnung Nr. {{ invoice.invoice_number }}</h1>
+    <h1>Rechnung Nr. {{ invoice_number }}</h1>
 
     <table class="line-items">
         <colgroup>

@@ -43,7 +43,6 @@ bank_details:
 """
 
 INVOICE_YAML = """\
-invoice_number: "{number}"
 customer: "acme-gmbh"
 issue_date: 2026-08-15
 due_date: 2026-08-29
@@ -70,9 +69,7 @@ def _setup_project(cwd: Path, *, invoice_number: str = "00000001") -> None:
     (cwd / "seller" / "seller.yml").write_text(SELLER_YAML, encoding="utf-8")
 
     (cwd / "invoices").mkdir(parents=True, exist_ok=True)
-    (cwd / "invoices" / f"{invoice_number}.yml").write_text(
-        INVOICE_YAML.format(number=invoice_number), encoding="utf-8"
-    )
+    (cwd / "invoices" / f"{invoice_number}.yml").write_text(INVOICE_YAML, encoding="utf-8")
 
     if not (cwd / "templates").exists():
         shutil.copytree(TEMPLATES_DIR, cwd / "templates")
@@ -133,10 +130,11 @@ def test_render_invoice_raises_when_seller_file_missing(tmp_path, monkeypatch, c
         RenderInvoiceCommand(invoice_number="00000001").run(context)
 
 
-def test_render_invoice_raises_when_file_name_does_not_match_invoice_number(tmp_path, monkeypatch, context):
+def test_render_invoice_uses_renamed_file_as_source_of_truth_for_number(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
     _setup_project(tmp_path)
     (tmp_path / "invoices" / "00000001.yml").rename(tmp_path / "invoices" / "00000002.yml")
 
-    with pytest.raises(RuntimeError, match="Invoice number mismatch"):
-        RenderInvoiceCommand(invoice_number="00000002").run(context)
+    RenderInvoiceCommand(invoice_number="00000002").run(context)
+
+    assert (tmp_path / "invoices" / "00000002.pdf").exists()

@@ -4,7 +4,6 @@ from rechnomat.invoice_calc import compute_totals
 from rechnomat.model import Invoice
 
 BASE_INVOICE = {
-    "invoice_number": "0000001",
     "customer": "acme-gmbh",
     "issue_date": "2026-08-15",
     "currency": "EUR",

@@ -7,13 +7,21 @@ from rechnomat.model import Customer, Invoice, Seller
 
 
 def render_invoice_pdf(
-    *, invoice: Invoice, customer: Customer, seller: Seller, output_path: Path, templates_dir: Path
+    *,
+    invoice: Invoice,
+    invoice_number: str,
+    customer: Customer,
+    seller: Seller,
+    output_path: Path,
+    templates_dir: Path,
 ) -> None:
     """
     Render `invoice` as a DIN 5008 Form A letter PDF: address field, letter body with line items and
     totals. No letterhead background or embedded EN 16931 XML yet - both are added in later steps.
     """
-    html = render_invoice_html(invoice=invoice, customer=customer, seller=seller, templates_dir=templates_dir)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller, templates_dir=templates_dir
+    )
 
     with sync_playwright() as playwright:
         # page.pdf() only works in headless mode.

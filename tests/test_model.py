@@ -46,7 +46,6 @@ VALID_SELLER = {
 }
 
 VALID_INVOICE = {
-    "invoice_number": "0000000",
     "customer": "acme-gmbh",
     "issue_date": "2026-08-15",
     "due_date": "2026-08-29",
@@ -79,7 +78,6 @@ def test_customer_rejects_invalid_country_code():
 
 def test_invoice_parses_valid_data():
     invoice = Invoice.model_validate(VALID_INVOICE)
-    assert invoice.invoice_number == "0000000"
     assert invoice.issue_date == date(2026, 8, 15)
     assert invoice.due_date == date(2026, 8, 29)
     assert len(invoice.line_items) == 1

@@ -30,7 +30,6 @@ SELLER = Seller.model_validate(
 )
 
 BASE_INVOICE = {
-    "invoice_number": "00000001",
     "customer": "acme-gmbh",
     "issue_date": "2026-08-15",
     "currency": "EUR",
@@ -43,7 +42,9 @@ BASE_INVOICE = {
 def test_render_invoice_html_contains_address_and_info_block():
     invoice = Invoice.model_validate(BASE_INVOICE)
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert "Musterfirma Max Mustermann · Beispielweg 5 · 80331 Muenchen" in html
     assert "ACME GmbH" in html
@@ -58,7 +59,9 @@ def test_render_invoice_html_contains_address_and_info_block():
 def test_render_invoice_html_omits_country_line_for_domestic_customer():
     invoice = Invoice.model_validate(BASE_INVOICE)
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert ">DE<" not in html
 
@@ -74,7 +77,9 @@ def test_render_invoice_html_includes_country_line_for_non_domestic_customer():
         }
     )
 
-    html = render_invoice_html(invoice=invoice, customer=customer, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=customer, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert ">CH<" in html
 
@@ -82,7 +87,9 @@ def test_render_invoice_html_includes_country_line_for_non_domestic_customer():
 def test_render_invoice_html_omits_optional_info_rows_when_absent():
     invoice = Invoice.model_validate(BASE_INVOICE)
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert "Zahlbar bis" not in html
     assert "Ihr Zeichen" not in html
@@ -91,7 +98,9 @@ def test_render_invoice_html_omits_optional_info_rows_when_absent():
 def test_render_invoice_html_includes_optional_info_rows_when_present():
     invoice = Invoice.model_validate({**BASE_INVOICE, "due_date": "2026-08-29", "buyer_reference": "PO-4711"})
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert "Zahlbar bis" in html
     assert "29.08.2026" in html
@@ -111,7 +120,9 @@ def test_render_invoice_html_formats_line_items_and_totals():
         }
     )
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert "Consulting" in html
     assert "8,00 Std." in html
@@ -136,7 +147,9 @@ def test_render_invoice_html_formats_line_items_and_totals():
 def test_render_invoice_html_omits_notes_block_when_absent():
     invoice = Invoice.model_validate(BASE_INVOICE)
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert 'class="notes"' not in html
 
@@ -144,7 +157,9 @@ def test_render_invoice_html_omits_notes_block_when_absent():
 def test_render_invoice_html_includes_notes_with_paragraph_breaks():
     invoice = Invoice.model_validate({**BASE_INVOICE, "notes": "Erster Absatz.\n\nZweiter Absatz."})
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert "Erster Absatz.\n\nZweiter Absatz." in html
 
@@ -152,7 +167,9 @@ def test_render_invoice_html_includes_notes_with_paragraph_breaks():
 def test_render_invoice_html_includes_bank_details():
     invoice = Invoice.model_validate(BASE_INVOICE)
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert "Musterfirma Max Mustermann" in html
     assert "Deutsche Kreditbank" in html
@@ -163,7 +180,9 @@ def test_render_invoice_html_includes_bank_details():
 def test_render_invoice_html_embeds_fonts_and_no_external_references():
     invoice = Invoice.model_validate(BASE_INVOICE)
 
-    html = render_invoice_html(invoice=invoice, customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR)
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
 
     assert "data:font/ttf;base64," in html
     assert 'url("fonts/' not in html

@@ -123,7 +123,6 @@ class LineItem(BaseModel):
 
 
 class Invoice(BaseModel):
-    invoice_number: str = Field(description="EN 16931 BT-1")
     customer: str = Field(description="references a Customer file by its filename stem")
     issue_date: date = Field(description="EN 16931 BT-2")
     due_date: date | None = None

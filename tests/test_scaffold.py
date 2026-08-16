@@ -42,10 +42,9 @@ def test_render_scaffold_escapes_quotes_and_backslashes_in_override():
 
 
 def test_render_scaffold_for_invoice_model():
-    result = render_scaffold(Invoice, overrides={"invoice_number": "0000123", "customer": "acme-gmbh"})
+    result = render_scaffold(Invoice, overrides={"customer": "acme-gmbh"})
     today = date.today().isoformat()
     assert result == (
-        'invoice_number: "0000123"  # EN 16931 BT-1\n'
         'customer: "acme-gmbh"  # references a Customer file by its filename stem\n'
         f"issue_date: {today}  # EN 16931 BT-2\n"
         f"due_date: {today}\n"
