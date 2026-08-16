@@ -61,6 +61,7 @@ body {
     left: 125mm;
     top: 32mm;
     width: 65mm;
+    text-align: right;
 }
 
 .info-row {
@@ -161,11 +162,19 @@ table.line-items tbody tr:last-child td {
     white-space: pre-wrap;
 }
 
+.payment-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    margin-top: 5mm;
+    break-inside: avoid;
+}
+
 .payment-instruction {
-    margin-top: 2.25mm;
+    margin: 0;
+    padding-right: 15mm;
 }
 
 .bank-details {
-    margin-top: 2.25mm;
-    break-inside: avoid;
+    text-align: left;
 }

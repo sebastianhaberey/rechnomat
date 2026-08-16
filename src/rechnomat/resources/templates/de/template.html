@@ -98,13 +98,15 @@
     {% endif %}
 
     {% if invoice.layout.render_bank_details %}
-    <p class="payment-instruction">Bitte überweisen Sie den Rechnungsbetrag{% if due_date_text %} bis zum {{ due_date_text }}{% endif %} unter Angabe der Rechnungsnummer auf folgendes Konto:</p>
+    <div class="payment-section">
+        <p class="payment-instruction">Bitte überweisen Sie den Rechnungsbetrag{% if due_date_text %} bis zum <strong>{{ due_date_text }}</strong>{% endif %} unter Angabe der Rechnungsnummer <strong>{{ invoice_number }}</strong> auf folgendes Konto:</p>
 
-    <div class="bank-details">
-        <div>{{ bank_details.account_owner }}</div>
-        <div>{{ bank_details.bank_name }}</div>
-        <div>IBAN {{ bank_details.iban }}</div>
-        <div>BIC {{ bank_details.bic }}</div>
+        <div class="bank-details">
+            <div>{{ bank_details.account_owner }}</div>
+            <div>{{ bank_details.bank_name }}</div>
+            <div>IBAN {{ bank_details.iban }}</div>
+            <div>BIC {{ bank_details.bic }}</div>
+        </div>
     </div>
     {% endif %}
 </div>
