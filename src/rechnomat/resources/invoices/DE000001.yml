@@ -2,14 +2,14 @@ customer: "meier-gmbh"  # references a Customer file by its filename stem
 layout: # invoice rendering options
   template: "de"  # selects the template directory under templates/
   render_bank_details: true  # show seller's bank details on the invoice
-  render_notes: false  # show the notes field on the invoice
+  render_notes: true  # show the notes field on the invoice
   render_address_line: true  # show the small address line above the customer address
   render_return_address_line: true  # show the seller's return address line
   background: "letterhead.pdf"  # file under backgrounds/ merged behind the content, leave empty for none
 issue_date: 2026-08-15  # invoice issue date (EN 16931 BT-2)
 payment_terms_days: 14  # days from issue_date until due_date
 currency: "EUR"  # (ISO 4217) (EN 16931 BT-5)
-buyer_reference: ""  # reference assigned by the buyer for internal routing (EN 16931 BT-10)
+buyer_reference: "AR/0815"  # reference assigned by the buyer for internal routing (EN 16931 BT-10)
 line_items: # invoice line items (EN 16931 BG-25)
   - description: "Arbeitsstunden"  # line item description (EN 16931 BT-153)
     quantity: "50"  # quantity (EN 16931 BT-129)

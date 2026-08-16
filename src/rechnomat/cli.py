@@ -5,6 +5,7 @@ import cloup
 from click import help_option, pass_obj, version_option
 from cloup import HelpFormatter, HelpTheme, Section, argument, group, option, pass_context
 
+from rechnomat.command.add_invoice import AddInvoiceCommand
 from rechnomat.command.info import InfoCommand
 from rechnomat.command.init import InitCommand
 from rechnomat.command.render_invoice import RenderInvoiceCommand
@@ -81,7 +82,25 @@ def init(obj, overwrite):
     command.run(obj["context"])
 
 
-@cli.command(section=SECTION_MAIN, name="render")
+@cli.command(section=SECTION_MAIN, name="add-invoice")
+@argument(
+    "customer-name",
+    required=False,
+    help="Customer to create the invoice for, references a Customer file by its filename stem (defaults to "
+    "whichever customer is on the most recent invoice)",
+)
+@help_option(help="Show this message")
+@pass_obj
+def add_invoice(obj, customer_name):
+    """
+    Add a new invoice, copying the customer's most recent invoice, or the most recent invoice
+    overall, or the bundled example invoice - whichever is found first
+    """
+    command = AddInvoiceCommand(customer_name=customer_name)
+    command.run(obj["context"])
+
+
+@cli.command(section=SECTION_MAIN, name="render-invoice")
 @argument(
     "invoice-number",
     required=False,
@@ -89,7 +108,7 @@ def init(obj, overwrite):
 )
 @help_option(help="Show this message")
 @pass_obj
-def render(obj, invoice_number):
+def render_invoice(obj, invoice_number):
     """
     Render an invoice as a PDF
     """

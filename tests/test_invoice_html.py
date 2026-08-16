@@ -104,7 +104,7 @@ def test_render_invoice_html_includes_optional_info_rows_when_present():
     assert "29.08.2026" in html
     assert "Ihr Zeichen" in html
     assert "PO-4711" in html
-    assert "bis zum 29.08.2026" in html
+    assert "bis zum <strong>29.08.2026</strong>" in html
 
 
 def test_render_invoice_html_formats_line_items_and_totals():
