@@ -14,6 +14,7 @@ class InitCommand:
     def run(self, context: Context) -> None:
         paths = context.paths
         resources = (
+            ("backgrounds", paths.backgrounds_dir),
             ("customers", paths.customers_dir),
             ("invoices", paths.invoices_dir),
             ("seller", paths.seller_dir),

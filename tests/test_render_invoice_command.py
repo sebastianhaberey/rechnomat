@@ -2,6 +2,7 @@ import shutil
 from pathlib import Path
 
 import pytest
+from pypdf import PdfReader
 
 from rechnomat.command.init import InitCommand
 from rechnomat.command.render_invoice import RenderInvoiceCommand
@@ -82,3 +83,25 @@ def test_render_invoice_uses_renamed_file_as_source_of_truth_for_number(tmp_path
     RenderInvoiceCommand(invoice_number="DE000009").run(context)
 
     assert (tmp_path / "DE000009.pdf").exists()
+
+
+def test_render_invoice_merges_bundled_background_by_default(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+
+    RenderInvoiceCommand(invoice_number="DE000001").run(context)
+
+    background_page = PdfReader(tmp_path / "backgrounds" / "letterhead.pdf").pages[0]
+    rendered_page = PdfReader(tmp_path / "DE000001.pdf").pages[0]
+    background_xobjects = set(background_page["/Resources"]["/XObject"].keys())
+    rendered_xobjects = set(rendered_page["/Resources"]["/XObject"].keys())
+    assert background_xobjects <= rendered_xobjects
+
+
+def test_render_invoice_raises_when_background_file_missing(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+    (tmp_path / "backgrounds" / "letterhead.pdf").unlink()
+
+    with pytest.raises(RuntimeError, match="Background file not found"):
+        RenderInvoiceCommand(invoice_number="DE000001").run(context)

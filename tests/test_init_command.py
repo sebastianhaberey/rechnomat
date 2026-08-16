@@ -22,6 +22,9 @@ def test_init_copies_all_bundled_resources(tmp_path, monkeypatch, context):
     assert (tmp_path / "seller" / "seller.yml").exists()
     assert (tmp_path / "templates" / "de" / "template.html").exists()
     assert (tmp_path / "templates" / "de" / "fonts").is_dir()
+    assert (tmp_path / "backgrounds" / "letterhead.pdf").read_bytes() == (
+        RESOURCES_DIR / "backgrounds" / "letterhead.pdf"
+    ).read_bytes()
 
 
 def test_init_leaves_existing_directories_untouched(tmp_path, monkeypatch, context):

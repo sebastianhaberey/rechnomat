@@ -6,6 +6,7 @@ from rechnomat.invoice_pdf import render_invoice_pdf
 from rechnomat.model import Customer, Invoice, Seller
 
 TEMPLATE_DIR = importlib.resources.files("rechnomat") / "resources" / "templates" / "de"
+BACKGROUND_PATH = importlib.resources.files("rechnomat") / "resources" / "backgrounds" / "letterhead.pdf"
 
 CUSTOMER = Customer.model_validate(
     {
@@ -140,3 +141,61 @@ def test_render_invoice_pdf_paginates_when_content_overflows_a_single_page(tmp_p
     )
 
     assert len(PdfReader(output_path).pages) > 1
+
+
+def test_render_invoice_pdf_merges_background_behind_content(tmp_path):
+    invoice = Invoice.model_validate(BASE_INVOICE)
+    output_path = tmp_path / "invoice.pdf"
+
+    render_invoice_pdf(
+        invoice=invoice,
+        invoice_number="00000001",
+        customer=CUSTOMER,
+        seller=SELLER,
+        output_path=output_path,
+        template_dir=TEMPLATE_DIR,
+        background_path=BACKGROUND_PATH,
+    )
+
+    background_page = PdfReader(BACKGROUND_PATH).pages[0]
+    rendered_page = PdfReader(output_path).pages[0]
+    background_xobjects = set(background_page["/Resources"]["/XObject"].keys())
+    rendered_xobjects = set(rendered_page["/Resources"]["/XObject"].keys())
+    assert background_xobjects <= rendered_xobjects
+    assert rendered_page.mediabox == background_page.mediabox
+
+
+def test_render_invoice_pdf_repeats_single_page_background_across_content_pages(tmp_path):
+    invoice = Invoice.model_validate(
+        {
+            **BASE_INVOICE,
+            "line_items": [
+                {
+                    "description": f"Beratungsleistung Position {i}",
+                    "quantity": "1",
+                    "unit": "HUR",
+                    "unit_price_net": "100.00",
+                    "vat_rate": "19",
+                }
+                for i in range(80)
+            ],
+        }
+    )
+    output_path = tmp_path / "invoice.pdf"
+
+    render_invoice_pdf(
+        invoice=invoice,
+        invoice_number="00000001",
+        customer=CUSTOMER,
+        seller=SELLER,
+        output_path=output_path,
+        template_dir=TEMPLATE_DIR,
+        background_path=BACKGROUND_PATH,
+    )
+
+    # single-page background must be repeated behind every content page, not collapse them into one
+    reader = PdfReader(output_path)
+    assert len(reader.pages) > 1
+    background_xobjects = set(PdfReader(BACKGROUND_PATH).pages[0]["/Resources"]["/XObject"].keys())
+    for page in reader.pages:
+        assert background_xobjects <= set(page["/Resources"]["/XObject"].keys())

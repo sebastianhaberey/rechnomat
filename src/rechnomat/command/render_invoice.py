@@ -36,6 +36,12 @@ class RenderInvoiceCommand:
         if not template_dir.exists():
             raise RuntimeError(f"Template directory not found: {template_dir}")
 
+        background_path = None
+        if invoice.layout.background is not None:
+            background_path = context.paths.background_file(invoice.layout.background)
+            if not background_path.exists():
+                raise RuntimeError(f"Background file not found: {background_path}")
+
         target_file = context.paths.output_dir / f"{invoice_number}.pdf"
         render_invoice_pdf(
             invoice=invoice,
@@ -44,6 +50,7 @@ class RenderInvoiceCommand:
             seller=seller,
             output_path=target_file,
             template_dir=template_dir,
+            background_path=background_path,
         )
 
         ui.success("Rendered invoice PDF", str(target_file))

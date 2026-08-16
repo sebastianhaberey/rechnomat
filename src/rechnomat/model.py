@@ -35,8 +35,15 @@ class Paths:
     def templates_dir(self) -> Path:
         return self.root / "templates"
 
+    @property
+    def backgrounds_dir(self) -> Path:
+        return self.root / "backgrounds"
+
     def template_dir(self, template_name: str) -> Path:
         return self.templates_dir / template_name
+
+    def background_file(self, background_name: str) -> Path:
+        return self.backgrounds_dir / background_name
 
     def customer_file(self, customer_name: str) -> Path:
         return self.customers_dir / f"{customer_name}.yml"
@@ -127,6 +134,9 @@ class Layout(BaseModel):
     render_notes: bool = True
     render_address_line: bool = True
     render_return_address_line: bool = True
+    background: str | None = Field(
+        default=None, description="file under backgrounds/ merged behind the content, e.g. 'letterhead.pdf'"
+    )
 
 
 class Invoice(BaseModel):
