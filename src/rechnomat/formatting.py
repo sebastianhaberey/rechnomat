@@ -5,7 +5,7 @@ _CURRENCY_SYMBOLS = {"EUR": "€"}
 
 # German abbreviations for UN/ECE Recommendation 20 unit codes commonly used on invoices.
 _UNIT_LABELS_DE = {
-    "HUR": "Std.",
+    "HUR": "Std",
     "DAY": "Tag",
     "WEE": "Woche",
     "MON": "Monat",

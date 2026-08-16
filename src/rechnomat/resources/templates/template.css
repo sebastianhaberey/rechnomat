@@ -139,12 +139,21 @@ table.line-items col.col-amount {
 }
 
 table.line-items td {
-    padding: 1mm 0 0 0;
+    padding: 1mm 0 1.5mm 0;
     vertical-align: top;
+}
+
+table.line-items td.col-desc {
+    white-space: pre-wrap;
 }
 
 table.line-items tbody tr.line-item-row {
     break-inside: avoid;
+}
+
+table.line-items tbody tr.line-item-row + tr.line-item-row td {
+    border-top: 0.3pt solid #ccc;
+    padding-top: 1.5mm;
 }
 
 table.line-items tbody tr:last-child td {

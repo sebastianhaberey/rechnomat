@@ -164,6 +164,30 @@ def test_render_invoice_html_includes_notes_with_paragraph_breaks():
     assert "Erster Absatz.\n\nZweiter Absatz." in html
 
 
+def test_render_invoice_html_preserves_line_breaks_in_line_item_description():
+    invoice = Invoice.model_validate(
+        {
+            **BASE_INVOICE,
+            "line_items": [
+                {
+                    "description": "Consulting\nProjekt Alpha",
+                    "quantity": "8",
+                    "unit": "HUR",
+                    "unit_price_net": "120.00",
+                    "vat_rate": "19",
+                }
+            ],
+        }
+    )
+
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, templates_dir=TEMPLATES_DIR
+    )
+
+    assert "Consulting\nProjekt Alpha" in html
+    assert '<td class="col-desc">' in html
+
+
 def test_render_invoice_html_includes_bank_details():
     invoice = Invoice.model_validate(BASE_INVOICE)
 
