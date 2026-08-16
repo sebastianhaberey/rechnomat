@@ -66,7 +66,6 @@ def test_customer_parses_valid_data():
     assert customer.name == "ACME GmbH"
     assert customer.address.country_code == "DE"
     assert customer.legal_form is None
-    assert customer.notes is None
 
 
 def test_customer_rejects_invalid_country_code():

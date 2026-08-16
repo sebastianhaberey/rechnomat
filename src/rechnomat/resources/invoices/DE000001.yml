@@ -1,33 +1,33 @@
 customer: "meier-gmbh"  # references a Customer file by its filename stem
-layout:
+layout: # invoice rendering options
   template: "de"  # selects the template directory under templates/
-  render_bank_details: true
-  render_notes: true
-  render_address_line: true
-  render_return_address_line: true
-issue_date: 2026-08-15  # EN 16931 BT-2
-payment_terms_days: 14
-currency: "EUR"  # ISO 4217, EN 16931 BT-5
-buyer_reference: ""  # EN 16931 BT-10
-line_items: # EN 16931 BG-25
-  - description: "Arbeitsstunden"
-    quantity: "50"
-    unit: "HUR"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"
-    unit_price_net: "13.90"
-    vat_rate: "19"  # percent
-  - description: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\nAt vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\nAt vero eos et accusam et justo duo dolores et ea rebum."
-    quantity: "8"
-    unit: "HUR"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"
-    unit_price_net: "100.00"
-    vat_rate: "19"  # percent
-  - description: "Goldbarren"
-    quantity: "11"
-    unit: "EA"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"
-    unit_price_net: "120000.00"
-    vat_rate: "7"  # percent
-  - description: "Aktenentsorgung"
-    quantity: "50"
-    unit: "KGM"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"
-    unit_price_net: "1.00"
-    vat_rate: "19"  # percent
-notes: "Ansprechpartner: Hr. Meier (Einkauf)"  # EN 16931 BT-22
+  render_bank_details: true  # show seller's bank details on the invoice
+  render_notes: true  # show the notes field on the invoice
+  render_address_line: true  # show the small address line above the customer address
+  render_return_address_line: true  # show the seller's return address line
+issue_date: 2026-08-15  # invoice issue date (EN 16931 BT-2)
+payment_terms_days: 14  # days from issue_date until due_date
+currency: "EUR"  # (ISO 4217) (EN 16931 BT-5)
+buyer_reference: ""  # reference assigned by the buyer for internal routing (EN 16931 BT-10)
+line_items: # invoice line items (EN 16931 BG-25)
+  - description: "Arbeitsstunden"  # line item description (EN 16931 BT-153)
+    quantity: "50"  # quantity (EN 16931 BT-129)
+    unit: "HUR"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA" (EN 16931 BT-130)
+    unit_price_net: "13.90"  # net unit price (EN 16931 BT-146)
+    vat_rate: "19"  # percent (EN 16931 BT-152)
+  - description: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\nAt vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\nAt vero eos et accusam et justo duo dolores et ea rebum."  # line item description (EN 16931 BT-153)
+    quantity: "8"  # quantity (EN 16931 BT-129)
+    unit: "HUR"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA" (EN 16931 BT-130)
+    unit_price_net: "100.00"  # net unit price (EN 16931 BT-146)
+    vat_rate: "19"  # percent (EN 16931 BT-152)
+  - description: "Goldbarren"  # line item description (EN 16931 BT-153)
+    quantity: "11"  # quantity (EN 16931 BT-129)
+    unit: "EA"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA" (EN 16931 BT-130)
+    unit_price_net: "120000.00"  # net unit price (EN 16931 BT-146)
+    vat_rate: "7"  # percent (EN 16931 BT-152)
+  - description: "Aktenentsorgung"  # line item description (EN 16931 BT-153)
+    quantity: "50"  # quantity (EN 16931 BT-129)
+    unit: "KGM"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA" (EN 16931 BT-130)
+    unit_price_net: "1.00"  # net unit price (EN 16931 BT-146)
+    vat_rate: "19"  # percent (EN 16931 BT-152)
+notes: "Ansprechpartner: Lisa-Marie Hartmann (Einkauf)"  # free-text note (EN 16931 BT-22)

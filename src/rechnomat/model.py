@@ -66,60 +66,59 @@ class Config:
 
 
 class Address(BaseModel):
-    street: str
-    postcode: str
-    city: str
-    country_code: str = Field(pattern=r"^[A-Z]{2}$", description="ISO 3166-1 alpha-2, EN 16931 BT-55")
+    street: str = Field(description="street and house number (EN 16931 BT-35/BT-50)")
+    postcode: str = Field(description="postal code (EN 16931 BT-38/BT-53)")
+    city: str = Field(description="city (EN 16931 BT-37/BT-52)")
+    country_code: str = Field(pattern=r"^[A-Z]{2}$", description="ISO 3166-1 alpha-2 (EN 16931 BT-40/BT-55)")
 
 
 class Contact(BaseModel):
-    name: str
-    email: str
-    phone: str
+    name: str = Field(description="contact person (EN 16931 BT-41/BT-56)")
+    email: str = Field(description="contact email address (EN 16931 BT-43/BT-58)")
+    phone: str = Field(description="contact phone number (EN 16931 BT-42/BT-57)")
 
 
 class Customer(BaseModel):
-    name: str
-    legal_form: str | None = None
+    name: str = Field(description="customer's legal/company name (EN 16931 BT-44)")
+    legal_form: str | None = Field(default=None, description='e.g. "GmbH"; leave empty if already part of name')
     address: Address
-    vat_id: str | None = Field(default=None, description="Ust-IdNr., EN 16931 BT-48")
+    vat_id: str | None = Field(default=None, description="Ust-IdNr. (EN 16931 BT-48)")
     contact: Contact
-    notes: str | None = None
 
 
 class BankDetails(BaseModel):
-    account_owner: str
-    iban: str = Field(description="EN 16931 BT-84")
-    bic: str = Field(description="EN 16931 BT-86")
-    bank_name: str
+    account_owner: str = Field(description="name on the bank account (EN 16931 BT-85)")
+    iban: str = Field(description="IBAN (EN 16931 BT-84)")
+    bic: str = Field(description="BIC (EN 16931 BT-86)")
+    bank_name: str = Field(description="name of the bank")
 
 
 class Seller(BaseModel):
-    name: str
-    legal_form: str | None = None
+    name: str = Field(description="seller's legal/company name (EN 16931 BT-27)")
+    legal_form: str | None = Field(default=None, description='e.g. "GmbH"; leave empty if already part of name')
     address: Address
-    vat_id: str | None = Field(default=None, description="Ust-IdNr., EN 16931 BT-31")
-    tax_number: str | None = Field(default=None, description="Steuernummer, EN 16931 BT-32")
+    vat_id: str | None = Field(default=None, description="Ust-IdNr. (EN 16931 BT-31)")
+    tax_number: str | None = Field(default=None, description="Steuernummer (EN 16931 BT-32)")
     trade_register: str | None = Field(
-        default=None, description='e.g. "Amtsgericht München, HRB 123456"; EN 16931 BT-30'
+        default=None, description='e.g. "Amtsgericht München, HRB 123456" (EN 16931 BT-30)'
     )
     contact: Contact
     bank_details: BankDetails
 
     @model_validator(mode="after")
     def _check_tax_identification(self) -> Seller:
-        # EN 16931 BR-CO-26: a seller must have a VAT identifier and/or a tax registration identifier.
+        # a seller must have a VAT identifier and/or a tax registration identifier (EN 16931 BR-CO-26)
         if not self.vat_id and not self.tax_number:
             raise ValueError("seller must have at least one of vat_id or tax_number")
         return self
 
 
 class LineItem(BaseModel):
-    description: str
-    quantity: Decimal
-    unit: str = Field(description='UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"')
-    unit_price_net: Decimal
-    vat_rate: Decimal = Field(description="percent")
+    description: str = Field(description="line item description (EN 16931 BT-153)")
+    quantity: Decimal = Field(description="quantity (EN 16931 BT-129)")
+    unit: str = Field(description='UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA" (EN 16931 BT-130)')
+    unit_price_net: Decimal = Field(description="net unit price (EN 16931 BT-146)")
+    vat_rate: Decimal = Field(description="percent (EN 16931 BT-152)")
 
 
 class Layout(BaseModel):
@@ -133,14 +132,16 @@ class Layout(BaseModel):
 class Invoice(BaseModel):
     customer: str = Field(description="references a Customer file by its filename stem")
     layout: Layout = Field(default_factory=Layout)
-    issue_date: date = Field(description="EN 16931 BT-2")
+    issue_date: date = Field(description="invoice issue date (EN 16931 BT-2)")
     payment_terms_days: int | None = Field(default=None, description="days from issue_date until due_date")
-    currency: str = Field(pattern=r"^[A-Z]{3}$", description="ISO 4217, EN 16931 BT-5")
-    buyer_reference: str | None = Field(default=None, description="EN 16931 BT-10")
-    line_items: list[LineItem] = Field(description="EN 16931 BG-25")
-    notes: str | None = Field(default=None, description="EN 16931 BT-22")
+    currency: str = Field(pattern=r"^[A-Z]{3}$", description="ISO 4217 (EN 16931 BT-5)")
+    buyer_reference: str | None = Field(
+        default=None, description="reference assigned by the buyer for internal routing (EN 16931 BT-10)"
+    )
+    line_items: list[LineItem] = Field(description="invoice line items (EN 16931 BG-25)")
+    notes: str | None = Field(default=None, description="free-text note (EN 16931 BT-22)")
 
-    @computed_field(description="EN 16931 BT-9")
+    @computed_field(description="invoice due date (EN 16931 BT-9)")
     @property
     def due_date(self) -> date | None:
         if self.payment_terms_days is None:
