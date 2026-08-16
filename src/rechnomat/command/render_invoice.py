@@ -32,9 +32,9 @@ class RenderInvoiceCommand:
             raise RuntimeError(f"Seller file not found: {seller_file}")
         seller = load_model(seller_file, Seller)
 
-        templates_dir = context.paths.templates_dir
-        if not templates_dir.exists():
-            raise RuntimeError(f"Templates directory not found: {templates_dir}")
+        template_dir = context.paths.template_dir(invoice.template)
+        if not template_dir.exists():
+            raise RuntimeError(f"Template directory not found: {template_dir}")
 
         target_file = context.paths.output_dir / f"{invoice_number}.pdf"
         render_invoice_pdf(
@@ -43,7 +43,7 @@ class RenderInvoiceCommand:
             customer=customer,
             seller=seller,
             output_path=target_file,
-            templates_dir=templates_dir,
+            template_dir=template_dir,
         )
 
         ui.success("Rendered invoice PDF", str(target_file))

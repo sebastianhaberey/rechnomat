@@ -35,6 +35,9 @@ class Paths:
     def templates_dir(self) -> Path:
         return self.root / "templates"
 
+    def template_dir(self, template_name: str) -> Path:
+        return self.templates_dir / template_name
+
     def customer_file(self, customer_name: str) -> Path:
         return self.customers_dir / f"{customer_name}.yml"
 
@@ -122,6 +125,7 @@ class LineItem(BaseModel):
 
 class Invoice(BaseModel):
     customer: str = Field(description="references a Customer file by its filename stem")
+    template: str = Field(default="de", description="selects the template directory under templates/, e.g. 'de'")
     issue_date: date = Field(description="EN 16931 BT-2")
     due_date: date | None = None
     currency: str = Field(pattern=r"^[A-Z]{3}$", description="ISO 4217, EN 16931 BT-5")

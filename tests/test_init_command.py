@@ -20,8 +20,8 @@ def test_init_copies_all_bundled_resources(tmp_path, monkeypatch, context):
     ).read_text(encoding="utf-8")
     assert (tmp_path / "invoices").is_dir()
     assert (tmp_path / "seller" / "seller.yml").exists()
-    assert (tmp_path / "templates" / "template.html").exists()
-    assert (tmp_path / "templates" / "fonts").is_dir()
+    assert (tmp_path / "templates" / "de" / "template.html").exists()
+    assert (tmp_path / "templates" / "de" / "fonts").is_dir()
 
 
 def test_init_leaves_existing_directories_untouched(tmp_path, monkeypatch, context):
@@ -45,7 +45,7 @@ def test_init_fills_in_missing_directories_alongside_existing_ones(tmp_path, mon
 
     assert (tmp_path / "invoices").is_dir()
     assert (tmp_path / "seller" / "seller.yml").exists()
-    assert (tmp_path / "templates" / "template.html").exists()
+    assert (tmp_path / "templates" / "de" / "template.html").exists()
 
 
 def test_init_with_overwrite_replaces_existing_directories(tmp_path, monkeypatch, context):

@@ -13,17 +13,17 @@ _FONT_URL_RE = re.compile(r'url\("(fonts/[^"]+)"\)')
 
 
 def render_invoice_html(
-    *, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller, templates_dir: Path
+    *, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller, template_dir: Path
 ) -> str:
     """
     Render `invoice` as a fully self-contained HTML string (CSS inlined, fonts embedded as base64
-    data URIs) using the template.html + template.css found in `templates_dir`. Does no browser
+    data URIs) using the template.html + template.css found in `template_dir`. Does no browser
     rendering - see invoice_pdf.render_invoice_pdf for the Playwright/PDF step.
     """
     context = _build_context(invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller)
-    context["inline_css"] = _read_css_with_embedded_fonts(templates_dir)
+    context["inline_css"] = _read_css_with_embedded_fonts(template_dir)
     env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(str(templates_dir)),
+        loader=jinja2.FileSystemLoader(str(template_dir)),
         autoescape=jinja2.select_autoescape(["html"]),
     )
     return env.get_template("template.html").render(**context)
@@ -64,11 +64,11 @@ def _build_context(*, invoice: Invoice, invoice_number: str, customer: Customer,
     }
 
 
-def _read_css_with_embedded_fonts(templates_dir) -> str:
-    css_text = (templates_dir / "template.css").read_text(encoding="utf-8")
+def _read_css_with_embedded_fonts(template_dir) -> str:
+    css_text = (template_dir / "template.css").read_text(encoding="utf-8")
 
     def _inline(match: re.Match) -> str:
-        font_bytes = (templates_dir / match.group(1)).read_bytes()
+        font_bytes = (template_dir / match.group(1)).read_bytes()
         b64 = base64.b64encode(font_bytes).decode("ascii")
         return f'url("data:font/ttf;base64,{b64}")'
 

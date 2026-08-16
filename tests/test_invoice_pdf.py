@@ -5,7 +5,7 @@ from pypdf import PdfReader
 from rechnomat.invoice_pdf import render_invoice_pdf
 from rechnomat.model import Customer, Invoice, Seller
 
-TEMPLATES_DIR = importlib.resources.files("rechnomat") / "resources" / "templates"
+TEMPLATE_DIR = importlib.resources.files("rechnomat") / "resources" / "templates" / "de"
 
 CUSTOMER = Customer.model_validate(
     {
@@ -51,7 +51,7 @@ def test_render_invoice_pdf_writes_valid_pdf_file(tmp_path):
         customer=CUSTOMER,
         seller=SELLER,
         output_path=output_path,
-        templates_dir=TEMPLATES_DIR,
+        template_dir=TEMPLATE_DIR,
     )
 
     assert output_path.read_bytes().startswith(b"%PDF-")
@@ -84,7 +84,7 @@ def test_render_invoice_pdf_handles_multiple_vat_rates_and_optional_fields(tmp_p
         customer=CUSTOMER,
         seller=SELLER,
         output_path=output_path,
-        templates_dir=TEMPLATES_DIR,
+        template_dir=TEMPLATE_DIR,
     )
 
     assert output_path.read_bytes().startswith(b"%PDF-")
@@ -108,7 +108,7 @@ def test_render_invoice_pdf_handles_non_domestic_customer_address(tmp_path):
         customer=customer,
         seller=SELLER,
         output_path=output_path,
-        templates_dir=TEMPLATES_DIR,
+        template_dir=TEMPLATE_DIR,
     )
 
     assert output_path.read_bytes().startswith(b"%PDF-")
@@ -138,7 +138,7 @@ def test_render_invoice_pdf_paginates_when_content_overflows_a_single_page(tmp_p
         customer=CUSTOMER,
         seller=SELLER,
         output_path=output_path,
-        templates_dir=TEMPLATES_DIR,
+        template_dir=TEMPLATE_DIR,
     )
 
     assert len(PdfReader(output_path).pages) > 1
