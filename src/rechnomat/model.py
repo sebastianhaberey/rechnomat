@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, model_validator
 @dataclass(frozen=True, slots=True)
 class Paths:
     root: Path
+    output_dir: Path
 
     @property
     def config_file(self) -> Path:
@@ -39,9 +40,6 @@ class Paths:
 
     def invoice_file(self, invoice_number: str) -> Path:
         return self.invoices_dir / f"{invoice_number}.yml"
-
-    def invoice_pdf_file(self, invoice_number: str) -> Path:
-        return self.invoices_dir / f"{invoice_number}.pdf"
 
 
 @dataclass(slots=True)

@@ -11,13 +11,14 @@ class InfoCommand:
 
     def run(self, context: Context) -> None:
         rows = [
-            ("executable", context.rechnomat_executable),
-            ("customers dir", context.paths.customers_dir),
-            ("invoices dir", context.paths.invoices_dir),
-            ("seller dir", context.paths.seller_dir),
-            ("templates dir", context.paths.templates_dir),
+            ("Executable", context.rechnomat_executable),
+            ("Customers directory", context.paths.customers_dir),
+            ("Invoices directory", context.paths.invoices_dir),
+            ("Seller directory", context.paths.seller_dir),
+            ("Templates directory", context.paths.templates_dir),
+            ("Output directory", context.paths.output_dir),
         ]
-        ui.header("Configuration", first=True)
+        ui.header("Context", first=True)
         ui.table(
             rows,
             column_colors=(STYLES[StyleId.PRIMARY], None),

@@ -57,7 +57,7 @@ def cli(
 
     ctx.ensure_object(dict)
 
-    paths = Paths(root=Path.cwd())
+    paths = Paths(root=Path.cwd(), output_dir=Path.cwd())
     rechnomat_executable = ctx.obj.pop("rechnomat_executable", None)
 
     ctx.obj["context"] = Context(

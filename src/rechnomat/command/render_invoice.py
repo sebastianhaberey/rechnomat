@@ -36,7 +36,7 @@ class RenderInvoiceCommand:
         if not templates_dir.exists():
             raise RuntimeError(f"Templates directory not found: {templates_dir}")
 
-        target_file = context.paths.invoice_pdf_file(invoice_number)
+        target_file = context.paths.output_dir / f"{invoice_number}.pdf"
         render_invoice_pdf(
             invoice=invoice,
             invoice_number=invoice_number,

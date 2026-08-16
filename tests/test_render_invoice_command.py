@@ -58,7 +58,7 @@ line_items:
 
 @pytest.fixture
 def context(tmp_path) -> Context:
-    return Context(debug=False, rechnomat_executable=Path("rechnomat"), paths=Paths(root=tmp_path))
+    return Context(debug=False, rechnomat_executable=Path("rechnomat"), paths=Paths(root=tmp_path, output_dir=tmp_path))
 
 
 def _setup_project(cwd: Path, *, invoice_number: str = "00000001") -> None:
@@ -81,7 +81,7 @@ def test_render_invoice_writes_pdf_for_explicit_number(tmp_path, monkeypatch, co
 
     RenderInvoiceCommand(invoice_number="00000001").run(context)
 
-    target = tmp_path / "invoices" / "00000001.pdf"
+    target = tmp_path / "00000001.pdf"
     assert target.exists()
     assert target.read_bytes().startswith(b"%PDF-")
 
@@ -93,8 +93,8 @@ def test_render_invoice_defaults_to_highest_invoice_number(tmp_path, monkeypatch
 
     RenderInvoiceCommand().run(context)
 
-    assert (tmp_path / "invoices" / "00000002.pdf").exists()
-    assert not (tmp_path / "invoices" / "00000001.pdf").exists()
+    assert (tmp_path / "00000002.pdf").exists()
+    assert not (tmp_path / "00000001.pdf").exists()
 
 
 def test_render_invoice_raises_when_no_invoices_exist(tmp_path, monkeypatch, context):
@@ -137,4 +137,4 @@ def test_render_invoice_uses_renamed_file_as_source_of_truth_for_number(tmp_path
 
     RenderInvoiceCommand(invoice_number="00000002").run(context)
 
-    assert (tmp_path / "invoices" / "00000002.pdf").exists()
+    assert (tmp_path / "00000002.pdf").exists()
