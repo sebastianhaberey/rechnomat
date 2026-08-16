@@ -18,12 +18,12 @@ pip package, and is required before `rechnomat render` will work.
 
 ### Getting started
 
-The tool reads `customers/`, `invoices/`, `seller/` and `templates/` from the current directory,
-not from the installed package. Before running `rechnomat render`, run `rechnomat init`
-inside whichever directory you run `rechnomat` from; it copies these four folders, pre-filled with
-example data, from `src/rechnomat/resources/` into the current directory. Folders that already
-exist are left untouched, so re-running `init` later only fills in whatever is still missing; you
-are notified whether each folder was copied or skipped.
+The tool reads `backgrounds/`, `customers/`, `invoices/`, `seller/` and `templates/` from the
+current directory, not from the installed package. Before running `rechnomat render`, run
+`rechnomat init` inside whichever directory you run `rechnomat` from; it copies these five
+folders, pre-filled with example data, from `src/rechnomat/resources/` into the current directory.
+Folders that already exist are left untouched, so re-running `init` later only fills in whatever
+is still missing; you are notified whether each folder was copied or skipped.
 
 ### System dependencies for headless Chromium (Linux only)
 
