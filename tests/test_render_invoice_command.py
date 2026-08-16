@@ -59,7 +59,7 @@ def test_render_invoice_raises_for_unknown_invoice_number(tmp_path, monkeypatch,
 def test_render_invoice_raises_when_customer_file_missing(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
     _setup_project(context)
-    (tmp_path / "customers" / "acme-corp.yml").unlink()
+    (tmp_path / "customers" / "meier-gmbh.yml").unlink()
 
     with pytest.raises(RuntimeError, match="Customer file not found"):
         RenderInvoiceCommand(invoice_number="DE000001").run(context)

@@ -1,4 +1,4 @@
-customer: "acme-corp"  # references a Customer file by its filename stem
+customer: "meier-gmbh"  # references a Customer file by its filename stem
 layout:
   template: "de"  # selects the template directory under templates/
   render_bank_details: true
@@ -10,7 +10,7 @@ payment_terms_days: 14
 currency: "EUR"  # ISO 4217, EN 16931 BT-5
 buyer_reference: ""  # EN 16931 BT-10
 line_items: # EN 16931 BG-25
-  - description: "Übelste Sklavenarbeit"
+  - description: "Arbeitsstunden"
     quantity: "50"
     unit: "HUR"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"
     unit_price_net: "13.90"
@@ -20,14 +20,14 @@ line_items: # EN 16931 BG-25
     unit: "HUR"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"
     unit_price_net: "100.00"
     vat_rate: "19"  # percent
-  - description: "Zusätzliches Bauchpinseln des Chefs"
+  - description: "Goldbarren"
     quantity: "11"
     unit: "EA"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"
     unit_price_net: "120000.00"
     vat_rate: "7"  # percent
-  - description: "Feinste Schweinehoden"
+  - description: "Aktenentsorgung"
     quantity: "50"
     unit: "KGM"  # UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA"
     unit_price_net: "1.00"
     vat_rate: "19"  # percent
-notes: "Dies ist eine zusätzliche Notiz"  # EN 16931 BT-22
+notes: "Ansprechpartner: Hr. Meier (Einkauf)"  # EN 16931 BT-22

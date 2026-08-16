@@ -15,8 +15,8 @@ def test_init_copies_all_bundled_resources(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
     InitCommand().run(context)
 
-    assert (tmp_path / "customers" / "acme-corp.yml").read_text(encoding="utf-8") == (
-        RESOURCES_DIR / "customers" / "acme-corp.yml"
+    assert (tmp_path / "customers" / "meier-gmbh.yml").read_text(encoding="utf-8") == (
+        RESOURCES_DIR / "customers" / "meier-gmbh.yml"
     ).read_text(encoding="utf-8")
     assert (tmp_path / "invoices").is_dir()
     assert (tmp_path / "seller" / "seller.yml").exists()
@@ -34,7 +34,7 @@ def test_init_leaves_existing_directories_untouched(tmp_path, monkeypatch, conte
     InitCommand().run(context)
 
     assert existing.read_text(encoding="utf-8") == 'name: "do not touch"\n'
-    assert not (customers_dir / "acme-corp.yml").exists()
+    assert not (customers_dir / "meier-gmbh.yml").exists()
 
 
 def test_init_fills_in_missing_directories_alongside_existing_ones(tmp_path, monkeypatch, context):
@@ -58,4 +58,4 @@ def test_init_with_overwrite_replaces_existing_directories(tmp_path, monkeypatch
     InitCommand(overwrite=True).run(context)
 
     assert not existing.exists()
-    assert (customers_dir / "acme-corp.yml").exists()
+    assert (customers_dir / "meier-gmbh.yml").exists()
