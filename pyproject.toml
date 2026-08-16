@@ -58,7 +58,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-rechnomat = ["templates/*.html", "templates/*.css", "templates/fonts/*"]
+rechnomat = ["resources/**/*"]
 
 [tool.ruff]
 line-length = 120

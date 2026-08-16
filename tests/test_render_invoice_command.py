@@ -1,59 +1,11 @@
-import importlib.resources
 import shutil
 from pathlib import Path
 
 import pytest
 
+from rechnomat.command.init import InitCommand
 from rechnomat.command.render_invoice import RenderInvoiceCommand
 from rechnomat.model import Context, Paths
-
-TEMPLATES_DIR = importlib.resources.files("rechnomat") / "resources" / "templates"
-
-CUSTOMER_YAML = """\
-name: "ACME GmbH"
-address:
-  street: "Musterstrasse 12"
-  postcode: "10115"
-  city: "Berlin"
-  country_code: "DE"
-contact:
-  name: "Maria Mustermann"
-  email: "maria@acme.example"
-  phone: "+49 30 1234567"
-payment_terms_days: 14
-"""
-
-SELLER_YAML = """\
-name: "Musterfirma Max Mustermann"
-address:
-  street: "Beispielweg 5"
-  postcode: "80331"
-  city: "Muenchen"
-  country_code: "DE"
-vat_id: "DE987654321"
-contact:
-  name: "Max Mustermann"
-  email: "max@musterfirma.example"
-  phone: "+49 89 1234567"
-bank_details:
-  account_owner: "Musterfirma Max Mustermann"
-  iban: "DE02120300000000202051"
-  bic: "BYLADEM1001"
-  bank_name: "Deutsche Kreditbank"
-"""
-
-INVOICE_YAML = """\
-customer: "acme-gmbh"
-issue_date: 2026-08-15
-due_date: 2026-08-29
-currency: "EUR"
-line_items:
-  - description: "Consulting services"
-    quantity: "8"
-    unit: "HUR"
-    unit_price_net: "120.00"
-    vat_rate: "19"
-"""
 
 
 @pytest.fixture
@@ -61,44 +13,36 @@ def context(tmp_path) -> Context:
     return Context(debug=False, rechnomat_executable=Path("rechnomat"), paths=Paths(root=tmp_path, output_dir=tmp_path))
 
 
-def _setup_project(cwd: Path, *, invoice_number: str = "00000001") -> None:
-    (cwd / "customers").mkdir(parents=True, exist_ok=True)
-    (cwd / "customers" / "acme-gmbh.yml").write_text(CUSTOMER_YAML, encoding="utf-8")
-
-    (cwd / "seller").mkdir(parents=True, exist_ok=True)
-    (cwd / "seller" / "seller.yml").write_text(SELLER_YAML, encoding="utf-8")
-
-    (cwd / "invoices").mkdir(parents=True, exist_ok=True)
-    (cwd / "invoices" / f"{invoice_number}.yml").write_text(INVOICE_YAML, encoding="utf-8")
-
-    if not (cwd / "templates").exists():
-        shutil.copytree(TEMPLATES_DIR, cwd / "templates")
+def _setup_project(context: Context) -> None:
+    InitCommand().run(context)
 
 
 def test_render_invoice_writes_pdf_for_explicit_number(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
-    _setup_project(tmp_path)
+    _setup_project(context)
 
-    RenderInvoiceCommand(invoice_number="00000001").run(context)
+    RenderInvoiceCommand(invoice_number="DE000001").run(context)
 
-    target = tmp_path / "00000001.pdf"
+    target = tmp_path / "DE000001.pdf"
     assert target.exists()
     assert target.read_bytes().startswith(b"%PDF-")
 
 
 def test_render_invoice_defaults_to_highest_invoice_number(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
-    _setup_project(tmp_path, invoice_number="00000001")
-    _setup_project(tmp_path, invoice_number="00000002")
+    _setup_project(context)
+    shutil.copy(tmp_path / "invoices" / "DE000001.yml", tmp_path / "invoices" / "DE000002.yml")
 
     RenderInvoiceCommand().run(context)
 
-    assert (tmp_path / "00000002.pdf").exists()
-    assert not (tmp_path / "00000001.pdf").exists()
+    assert (tmp_path / "DE000002.pdf").exists()
+    assert not (tmp_path / "DE000001.pdf").exists()
 
 
 def test_render_invoice_raises_when_no_invoices_exist(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+    shutil.rmtree(tmp_path / "invoices")
 
     with pytest.raises(RuntimeError, match="No invoices found"):
         RenderInvoiceCommand().run(context)
@@ -106,7 +50,7 @@ def test_render_invoice_raises_when_no_invoices_exist(tmp_path, monkeypatch, con
 
 def test_render_invoice_raises_for_unknown_invoice_number(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
-    _setup_project(tmp_path)
+    _setup_project(context)
 
     with pytest.raises(RuntimeError, match="Invoice file not found"):
         RenderInvoiceCommand(invoice_number="00099999").run(context)
@@ -114,27 +58,27 @@ def test_render_invoice_raises_for_unknown_invoice_number(tmp_path, monkeypatch,
 
 def test_render_invoice_raises_when_customer_file_missing(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
-    _setup_project(tmp_path)
-    (tmp_path / "customers" / "acme-gmbh.yml").unlink()
+    _setup_project(context)
+    (tmp_path / "customers" / "acme-corp.yml").unlink()
 
     with pytest.raises(RuntimeError, match="Customer file not found"):
-        RenderInvoiceCommand(invoice_number="00000001").run(context)
+        RenderInvoiceCommand(invoice_number="DE000001").run(context)
 
 
 def test_render_invoice_raises_when_seller_file_missing(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
-    _setup_project(tmp_path)
+    _setup_project(context)
     (tmp_path / "seller" / "seller.yml").unlink()
 
     with pytest.raises(RuntimeError, match="Seller file not found"):
-        RenderInvoiceCommand(invoice_number="00000001").run(context)
+        RenderInvoiceCommand(invoice_number="DE000001").run(context)
 
 
 def test_render_invoice_uses_renamed_file_as_source_of_truth_for_number(tmp_path, monkeypatch, context):
     monkeypatch.chdir(tmp_path)
-    _setup_project(tmp_path)
-    (tmp_path / "invoices" / "00000001.yml").rename(tmp_path / "invoices" / "00000002.yml")
+    _setup_project(context)
+    (tmp_path / "invoices" / "DE000001.yml").rename(tmp_path / "invoices" / "DE000009.yml")
 
-    RenderInvoiceCommand(invoice_number="00000002").run(context)
+    RenderInvoiceCommand(invoice_number="DE000009").run(context)
 
-    assert (tmp_path / "00000002.pdf").exists()
+    assert (tmp_path / "DE000009.pdf").exists()

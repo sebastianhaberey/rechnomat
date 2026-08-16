@@ -1,1 +1,1 @@
-recursive-include src/rechnomat/templates *
+recursive-include src/rechnomat/resources *
