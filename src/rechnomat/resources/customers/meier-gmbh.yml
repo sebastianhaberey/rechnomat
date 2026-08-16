@@ -1,12 +1,12 @@
 name: "Meier GmbH & Co KG"  # customer's legal/company name (EN 16931 BT-44)
 legal_form: ""  # e.g. "GmbH"; leave empty if already part of name
 address:
-  street: "Musterstraße 12"  # street and house number (EN 16931 BT-35/BT-50)
-  postcode: "10115"  # postal code (EN 16931 BT-38/BT-53)
-  city: "Berlin"  # city (EN 16931 BT-37/BT-52)
+  street: "Beispielweg 5"  # street and house number (EN 16931 BT-35/BT-50)
+  postcode: "80331"  # postal code (EN 16931 BT-38/BT-53)
+  city: "München"  # city (EN 16931 BT-37/BT-52)
   country_code: "DE"  # (ISO 3166-1 alpha-2) (EN 16931 BT-40/BT-55)
-vat_id: "DE123456789"  # Ust-IdNr. (EN 16931 BT-48)
+vat_id: "DE987654321"  # Ust-IdNr. (EN 16931 BT-48)
 contact:
   name: "Peter Meier"  # contact person at the customer (EN 16931 BT-41/BT-56)
   email: "peter.meier@meier-gmbh.de"  # contact email address (EN 16931 BT-43/BT-58)
-  phone: "+49 30 1234567"  # contact phone number (EN 16931 BT-42/BT-57)
+  phone: "+49 89 1234567"  # contact phone number (EN 16931 BT-42/BT-57)

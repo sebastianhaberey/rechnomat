@@ -1,19 +1,19 @@
-name: "Musterfirma Max Mustermann"  # seller's legal/company name (EN 16931 BT-27)
+name: "Musterhaus Solutions GmbH"  # seller's legal/company name (EN 16931 BT-27)
 legal_form: ""  # e.g. "GmbH"; leave empty if already part of name
 address:
-  street: "Beispielweg 5"  # street and house number (EN 16931 BT-35/BT-50)
-  postcode: "80331"  # postal code (EN 16931 BT-38/BT-53)
-  city: "München"  # city (EN 16931 BT-37/BT-52)
+  street: "Musterstraße 12"  # street and house number (EN 16931 BT-35/BT-50)
+  postcode: "10115"  # postal code (EN 16931 BT-38/BT-53)
+  city: "Berlin"  # city (EN 16931 BT-37/BT-52)
   country_code: "DE"  # (ISO 3166-1 alpha-2) (EN 16931 BT-40/BT-55)
-vat_id: "DE987654321"  # Ust-IdNr. (EN 16931 BT-31)
+vat_id: "DE123456789"  # Ust-IdNr. (EN 16931 BT-31)
 tax_number: ""  # Steuernummer (EN 16931 BT-32)
 trade_register: ""  # e.g. "Amtsgericht München, HRB 123456" (EN 16931 BT-30)
 contact:
-  name: "Max Mustermann"  # contact person at the seller (EN 16931 BT-41/BT-56)
-  email: "max.mustermann@musterfirma.example"  # contact email address (EN 16931 BT-43/BT-58)
-  phone: "+49 89 1234567"  # contact phone number (EN 16931 BT-42/BT-57)
+  name: "Harald Kaiser"  # contact person at the seller (EN 16931 BT-41/BT-56)
+  email: "harald.kaiser@musterhaus-solutions.de"  # contact email address (EN 16931 BT-43/BT-58)
+  phone: "+49 30 1234567"  # contact phone number (EN 16931 BT-42/BT-57)
 bank_details:
-  account_owner: "Max und Mia Mustermann"  # name on the bank account (EN 16931 BT-85)
+  account_owner: "Musterhaus EDV Solutions GmbH"  # name on the bank account (EN 16931 BT-85)
   iban: "DE02120300000000202051"  # IBAN (EN 16931 BT-84)
   bic: "BYLADEM1001"  # BIC (EN 16931 BT-86)
   bank_name: "Deutsche Kreditbank"  # name of the bank
