@@ -1,5 +1,10 @@
 customer: "acme-corp"  # references a Customer file by its filename stem
-template: "de"  # selects the template directory under templates/
+layout:
+  template: "de"  # selects the template directory under templates/
+  render_bank_details: true
+  render_notes: true
+  render_address_line: true
+  render_return_address_line: true
 issue_date: 2026-08-15  # EN 16931 BT-2
 due_date: 2026-08-29
 currency: "EUR"  # ISO 4217, EN 16931 BT-5

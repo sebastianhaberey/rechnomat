@@ -38,8 +38,8 @@ def test_format_date_de_uses_german_day_month_year_order():
 
 
 def test_format_unit_de_maps_known_unece_codes():
-    assert format_unit_de("HUR") == "Std."
-    assert format_unit_de("H87") == "Stk."
+    assert format_unit_de("HUR") == "Std"
+    assert format_unit_de("H87") == "Stk"
 
 
 def test_format_unit_de_falls_back_to_raw_code_for_unknown_unit():

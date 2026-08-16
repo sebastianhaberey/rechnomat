@@ -123,9 +123,17 @@ class LineItem(BaseModel):
     vat_rate: Decimal = Field(description="percent")
 
 
+class Layout(BaseModel):
+    template: str = Field(default="de", description="selects the template directory under templates/, e.g. 'de'")
+    render_bank_details: bool = True
+    render_notes: bool = True
+    render_address_line: bool = True
+    render_return_address_line: bool = True
+
+
 class Invoice(BaseModel):
     customer: str = Field(description="references a Customer file by its filename stem")
-    template: str = Field(default="de", description="selects the template directory under templates/, e.g. 'de'")
+    layout: Layout = Field(default_factory=Layout)
     issue_date: date = Field(description="EN 16931 BT-2")
     due_date: date | None = None
     currency: str = Field(pattern=r"^[A-Z]{3}$", description="ISO 4217, EN 16931 BT-5")

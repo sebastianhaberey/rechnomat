@@ -32,7 +32,7 @@ class RenderInvoiceCommand:
             raise RuntimeError(f"Seller file not found: {seller_file}")
         seller = load_model(seller_file, Seller)
 
-        template_dir = context.paths.template_dir(invoice.template)
+        template_dir = context.paths.template_dir(invoice.layout.template)
         if not template_dir.exists():
             raise RuntimeError(f"Template directory not found: {template_dir}")
 

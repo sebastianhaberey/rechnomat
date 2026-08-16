@@ -12,11 +12,15 @@
     <div class="fold-mark fold-mark-2"></div>
 
     <div class="address-field">
+        {% if invoice.layout.render_return_address_line %}
         <span class="return-address-text">{{ return_address_line }}</span>
+        {% endif %}
+        {% if invoice.layout.render_address_line %}
         <div class="address-lines">
             {% for line in address_lines %}<div>{{ line }}</div>
             {% endfor %}
         </div>
+        {% endif %}
     </div>
 
     <div class="info-block">
@@ -93,10 +97,11 @@
         </div>
     </div>
 
-    {% if notes %}
+    {% if notes and invoice.layout.render_notes %}
     <div class="notes">{{ notes }}</div>
     {% endif %}
 
+    {% if invoice.layout.render_bank_details %}
     <p class="payment-instruction">Bitte überweisen Sie den Rechnungsbetrag{% if due_date_text %} bis zum {{ due_date_text }}{% endif %} unter Angabe der Rechnungsnummer auf folgendes Konto:</p>
 
     <div class="bank-details">
@@ -105,6 +110,7 @@
         <div>IBAN {{ bank_details.iban }}</div>
         <div>BIC {{ bank_details.bic }}</div>
     </div>
+    {% endif %}
 </div>
 </body>
 </html>

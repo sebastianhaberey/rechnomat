@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from rechnomat.model import Address, Customer, Invoice, Seller
+from rechnomat.model import Address, Customer, Invoice, Layout, Seller
 
 VALID_CUSTOMER = {
     "name": "ACME GmbH",
@@ -105,6 +105,37 @@ def test_invoice_requires_line_items():
 def test_invoice_due_date_is_optional():
     invoice = Invoice.model_validate({k: v for k, v in VALID_INVOICE.items() if k != "due_date"})
     assert invoice.due_date is None
+
+
+def test_invoice_layout_defaults_to_de_template_with_everything_rendered():
+    invoice = Invoice.model_validate(VALID_INVOICE)
+    assert invoice.layout == Layout(
+        template="de",
+        render_bank_details=True,
+        render_notes=True,
+        render_address_line=True,
+        render_return_address_line=True,
+    )
+
+
+def test_invoice_layout_can_be_overridden():
+    invoice = Invoice.model_validate(
+        {
+            **VALID_INVOICE,
+            "layout": {
+                "template": "en",
+                "render_bank_details": False,
+                "render_notes": False,
+                "render_address_line": False,
+                "render_return_address_line": False,
+            },
+        }
+    )
+    assert invoice.layout.template == "en"
+    assert invoice.layout.render_bank_details is False
+    assert invoice.layout.render_notes is False
+    assert invoice.layout.render_address_line is False
+    assert invoice.layout.render_return_address_line is False
 
 
 def test_seller_parses_valid_data():
