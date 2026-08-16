@@ -9,6 +9,7 @@ from rechnomat.command.create_customer import CreateCustomerCommand
 from rechnomat.command.create_invoice import CreateInvoiceCommand
 from rechnomat.command.create_seller import CreateSellerCommand
 from rechnomat.command.info import InfoCommand
+from rechnomat.command.init_templates import InitTemplatesCommand
 from rechnomat.command.render_invoice import RenderInvoiceCommand
 from rechnomat.model import Context, Paths
 from rechnomat.theme import StyleId, theme
@@ -86,6 +87,17 @@ def create_seller(obj):
     Create the seller YAML file
     """
     command = CreateSellerCommand()
+    command.run(obj["context"])
+
+
+@cli.command(section=SECTION_MAIN, name="init-templates")
+@help_option(help="Show this message")
+@pass_obj
+def init_templates(obj):
+    """
+    Replace the templates directory with the bundled templates
+    """
+    command = InitTemplatesCommand()
     command.run(obj["context"])
 
 

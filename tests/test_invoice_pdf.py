@@ -5,7 +5,7 @@ from pypdf import PdfReader
 from rechnomat.invoice_pdf import render_invoice_pdf
 from rechnomat.model import Customer, Invoice, Seller
 
-TEMPLATES_DIR = importlib.resources.files("rechnomat") / "templates"
+TEMPLATES_DIR = importlib.resources.files("rechnomat") / "resources" / "templates"
 
 CUSTOMER = Customer.model_validate(
     {

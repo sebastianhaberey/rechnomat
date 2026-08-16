@@ -18,10 +18,10 @@ pip package, and is required before `rechnomat render-invoice` will work.
 
 ### Templates
 
-The tool loads templates from `<run directory>/templates/`, not from the installed package. The
-canonical copy lives in `src/rechnomat/resources/templates/`; before running `rechnomat
-render-invoice`, copy that directory (including `fonts/`) to `templates/` inside whichever
-directory you run `rechnomat` from.
+The tool loads templates from `<run directory>/templates/`, not from the installed package. Before
+running `rechnomat render-invoice`, run `rechnomat init-templates` inside whichever directory you
+run `rechnomat` from; it copies the bundled templates (including `fonts/`) from
+`src/rechnomat/resources/templates/` into `templates/`, replacing any existing directory.
 
 ### System dependencies for headless Chromium (Linux only)
 

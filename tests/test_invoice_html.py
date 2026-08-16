@@ -3,7 +3,7 @@ import importlib.resources
 from rechnomat.invoice_html import render_invoice_html
 from rechnomat.model import Customer, Invoice, Seller
 
-TEMPLATES_DIR = importlib.resources.files("rechnomat") / "templates"
+TEMPLATES_DIR = importlib.resources.files("rechnomat") / "resources" / "templates"
 
 CUSTOMER = Customer.model_validate(
     {

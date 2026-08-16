@@ -7,7 +7,7 @@ import pytest
 from rechnomat.command.render_invoice import RenderInvoiceCommand
 from rechnomat.model import Context, Paths
 
-TEMPLATES_DIR = importlib.resources.files("rechnomat") / "templates"
+TEMPLATES_DIR = importlib.resources.files("rechnomat") / "resources" / "templates"
 
 CUSTOMER_YAML = """\
 name: "ACME GmbH"
