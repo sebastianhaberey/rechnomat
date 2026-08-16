@@ -13,7 +13,8 @@ a valid e-invoice.
 ## What the app does
 
 1. Takes invoice data (seller, buyer, line items, VAT, totals, dates, etc.).
-2. Renders that data as a visual PDF, layered on top of a fixed vector letterhead/background PDF supplied by the user.
+2. Renders that data as a visual PDF (DIN 5008 letter format), layered on top of a fixed vector letterhead/background
+   PDF supplied by the user.
 3. Generates a corresponding EN 16931-compliant CII XML representation of the same invoice.
 4. Embeds that XML into the visual PDF, converting the result into a conformant PDF/A-3 container — this combined file
    is the final ZUGFeRD/Factur-X invoice.
@@ -34,7 +35,7 @@ a valid e-invoice.
 
 ## Suggested stack
 
-- PDF content rendering: `reportlab`
+- PDF content rendering: `playwright`
 - PDF merging (background + content): `pypdf`
 - EN 16931 XML modeling: `drafthorse`
 - XML embedding + PDF/A-3 conversion: `factur-x`
