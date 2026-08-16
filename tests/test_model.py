@@ -20,7 +20,6 @@ VALID_CUSTOMER = {
         "email": "maria.mustermann@acme-gmbh.example",
         "phone": "+49 30 1234567",
     },
-    "payment_terms_days": 14,
 }
 
 VALID_SELLER = {
@@ -48,7 +47,7 @@ VALID_SELLER = {
 VALID_INVOICE = {
     "customer": "acme-gmbh",
     "issue_date": "2026-08-15",
-    "due_date": "2026-08-29",
+    "payment_terms_days": 14,
     "currency": "EUR",
     "line_items": [
         {
@@ -103,8 +102,13 @@ def test_invoice_requires_line_items():
 
 
 def test_invoice_due_date_is_optional():
-    invoice = Invoice.model_validate({k: v for k, v in VALID_INVOICE.items() if k != "due_date"})
+    invoice = Invoice.model_validate({k: v for k, v in VALID_INVOICE.items() if k != "payment_terms_days"})
     assert invoice.due_date is None
+
+
+def test_invoice_due_date_is_computed_across_year_boundary():
+    invoice = Invoice.model_validate({**VALID_INVOICE, "issue_date": "2026-12-20", "payment_terms_days": 30})
+    assert invoice.due_date == date(2027, 1, 19)
 
 
 def test_invoice_layout_defaults_to_de_template_with_everything_rendered():

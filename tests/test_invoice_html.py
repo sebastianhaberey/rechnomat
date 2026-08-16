@@ -10,7 +10,6 @@ CUSTOMER = Customer.model_validate(
         "name": "ACME GmbH",
         "address": {"street": "Musterstrasse 12", "postcode": "10115", "city": "Berlin", "country_code": "DE"},
         "contact": {"name": "Maria Mustermann", "email": "maria@acme.example", "phone": "+49 30 1234567"},
-        "payment_terms_days": 14,
     }
 )
 
@@ -73,7 +72,6 @@ def test_render_invoice_html_includes_country_line_for_non_domestic_customer():
             "name": "Acme AG",
             "address": {"street": "Bahnhofstrasse 1", "postcode": "8001", "city": "Zuerich", "country_code": "CH"},
             "contact": {"name": "Peter Muster", "email": "peter@acme.example", "phone": "+41 44 1234567"},
-            "payment_terms_days": 30,
         }
     )
 
@@ -96,7 +94,7 @@ def test_render_invoice_html_omits_optional_info_rows_when_absent():
 
 
 def test_render_invoice_html_includes_optional_info_rows_when_present():
-    invoice = Invoice.model_validate({**BASE_INVOICE, "due_date": "2026-08-29", "buyer_reference": "PO-4711"})
+    invoice = Invoice.model_validate({**BASE_INVOICE, "payment_terms_days": 14, "buyer_reference": "PO-4711"})
 
     html = render_invoice_html(
         invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, template_dir=TEMPLATE_DIR

@@ -6,7 +6,7 @@ layout:
   render_address_line: true
   render_return_address_line: true
 issue_date: 2026-08-15  # EN 16931 BT-2
-due_date: 2026-08-29
+payment_terms_days: 14
 currency: "EUR"  # ISO 4217, EN 16931 BT-5
 buyer_reference: ""  # EN 16931 BT-10
 line_items: # EN 16931 BG-25

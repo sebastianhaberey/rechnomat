@@ -12,7 +12,6 @@ CUSTOMER = Customer.model_validate(
         "name": "ACME GmbH",
         "address": {"street": "Musterstrasse 12", "postcode": "10115", "city": "Berlin", "country_code": "DE"},
         "contact": {"name": "Maria Mustermann", "email": "maria@acme.example", "phone": "+49 30 1234567"},
-        "payment_terms_days": 14,
     }
 )
 
@@ -61,7 +60,7 @@ def test_render_invoice_pdf_handles_multiple_vat_rates_and_optional_fields(tmp_p
     invoice = Invoice.model_validate(
         {
             **BASE_INVOICE,
-            "due_date": "2026-08-29",
+            "payment_terms_days": 14,
             "buyer_reference": "PO-4711",
             "notes": "Vielen Dank für die gute Zusammenarbeit.",
             "line_items": [
@@ -97,7 +96,6 @@ def test_render_invoice_pdf_handles_non_domestic_customer_address(tmp_path):
             "name": "Acme AG",
             "address": {"street": "Bahnhofstrasse 1", "postcode": "8001", "city": "Zuerich", "country_code": "CH"},
             "contact": {"name": "Peter Muster", "email": "peter@acme.example", "phone": "+41 44 1234567"},
-            "payment_terms_days": 30,
         }
     )
     output_path = tmp_path / "invoice.pdf"

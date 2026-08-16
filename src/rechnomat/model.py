@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from pathlib import Path
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,7 +84,6 @@ class Customer(BaseModel):
     address: Address
     vat_id: str | None = Field(default=None, description="Ust-IdNr., EN 16931 BT-48")
     contact: Contact
-    payment_terms_days: int
     notes: str | None = None
 
 
@@ -135,8 +134,15 @@ class Invoice(BaseModel):
     customer: str = Field(description="references a Customer file by its filename stem")
     layout: Layout = Field(default_factory=Layout)
     issue_date: date = Field(description="EN 16931 BT-2")
-    due_date: date | None = None
+    payment_terms_days: int | None = Field(default=None, description="days from issue_date until due_date")
     currency: str = Field(pattern=r"^[A-Z]{3}$", description="ISO 4217, EN 16931 BT-5")
     buyer_reference: str | None = Field(default=None, description="EN 16931 BT-10")
     line_items: list[LineItem] = Field(description="EN 16931 BG-25")
     notes: str | None = Field(default=None, description="EN 16931 BT-22")
+
+    @computed_field(description="EN 16931 BT-9")
+    @property
+    def due_date(self) -> date | None:
+        if self.payment_terms_days is None:
+            return None
+        return self.issue_date + timedelta(days=self.payment_terms_days)

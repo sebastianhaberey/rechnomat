@@ -5,7 +5,6 @@ CUSTOMER = {
     "name": "ACME GmbH",
     "address": {"street": "Musterstrasse 12", "postcode": "10115", "city": "Berlin", "country_code": "DE"},
     "contact": {"name": "Maria Mustermann", "email": "maria@acme.example", "phone": "+49 30 1234567"},
-    "payment_terms_days": 14,
 }
 
 SELLER = {
