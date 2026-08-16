@@ -65,13 +65,19 @@ def cli(
 
 
 @cli.command(section=SECTION_MAIN)
+@option(
+    "-o",
+    "--overwrite",
+    is_flag=True,
+    help="Replace existing directories instead of skipping them",
+)
 @help_option(help="Show this message")
 @pass_obj
-def init(obj):
+def init(obj, overwrite):
     """
     Copy the bundled example customers, invoices, seller and templates into the current directory
     """
-    command = InitCommand()
+    command = InitCommand(overwrite=overwrite)
     command.run(obj["context"])
 
 

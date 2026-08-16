@@ -46,3 +46,16 @@ def test_init_fills_in_missing_directories_alongside_existing_ones(tmp_path, mon
     assert (tmp_path / "invoices").is_dir()
     assert (tmp_path / "seller" / "seller.yml").exists()
     assert (tmp_path / "templates" / "template.html").exists()
+
+
+def test_init_with_overwrite_replaces_existing_directories(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    customers_dir = tmp_path / "customers"
+    customers_dir.mkdir()
+    existing = customers_dir / "do-not-touch.yml"
+    existing.write_text('name: "do not touch"\n', encoding="utf-8")
+
+    InitCommand(overwrite=True).run(context)
+
+    assert not existing.exists()
+    assert (customers_dir / "acme-corp.yml").exists()
