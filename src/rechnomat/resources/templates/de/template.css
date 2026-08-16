@@ -36,25 +36,6 @@ body {
     overflow: visible;
 }
 
-.fold-mark {
-    position: absolute;
-    left: 0;
-    width: 5mm;
-    border-top: 0.3pt solid #000;
-}
-
-.fold-mark-1 {
-    top: 105mm;
-}
-
-.punch-mark {
-    top: 148.5mm;
-}
-
-.fold-mark-2 {
-    top: 210mm;
-}
-
 .address-field {
     position: absolute;
     left: 20mm;
