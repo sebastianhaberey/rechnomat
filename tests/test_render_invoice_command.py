@@ -1,9 +1,13 @@
+import importlib.resources
+import shutil
 from pathlib import Path
 
 import pytest
 
 from rechnomat.command.render_invoice import RenderInvoiceCommand
 from rechnomat.model import Context, Paths
+
+TEMPLATES_DIR = importlib.resources.files("rechnomat") / "templates"
 
 CUSTOMER_YAML = """\
 name: "ACME GmbH"
@@ -69,6 +73,9 @@ def _setup_project(cwd: Path, *, invoice_number: str = "00000001") -> None:
     (cwd / "invoices" / f"{invoice_number}.yml").write_text(
         INVOICE_YAML.format(number=invoice_number), encoding="utf-8"
     )
+
+    if not (cwd / "templates").exists():
+        shutil.copytree(TEMPLATES_DIR, cwd / "templates")
 
 
 def test_render_invoice_writes_pdf_for_explicit_number(tmp_path, monkeypatch, context):

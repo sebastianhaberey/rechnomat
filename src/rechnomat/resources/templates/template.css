@@ -1,0 +1,181 @@
+@font-face {
+    font-family: "Liberation Sans";
+    src: url("fonts/LiberationSans-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Liberation Sans";
+    src: url("fonts/LiberationSans-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Liberation Sans", sans-serif;
+    font-size: 10pt;
+    color: #000;
+}
+
+/* DIN 5008 Form A reference points (approximate standard values for a C6/5 windowed envelope),
+   measured from the top-left corner of the page. Not yet verified against a real envelope/printer -
+   revisit once the letterhead background is added. Page-1 only, so this block is a zero-height
+   absolutely-positioned overlay rather than part of normal document flow. */
+.page1-guides {
+    position: relative;
+    height: 0;
+    overflow: visible;
+}
+
+.fold-mark {
+    position: absolute;
+    left: 0;
+    width: 5mm;
+    border-top: 0.3pt solid #000;
+}
+
+.fold-mark-1 {
+    top: 105mm;
+}
+
+.punch-mark {
+    top: 148.5mm;
+}
+
+.fold-mark-2 {
+    top: 210mm;
+}
+
+.address-field {
+    position: absolute;
+    left: 20mm;
+    top: 45mm;
+    width: 85mm;
+}
+
+.return-address-text {
+    display: inline-block;
+    font-size: 7pt;
+    border-bottom: 0.3pt solid #000;
+    padding-bottom: 1.5pt;
+}
+
+.address-lines {
+    margin-top: 4mm;
+    font-size: 10pt;
+    line-height: 4.5mm;
+}
+
+.info-block {
+    position: absolute;
+    left: 125mm;
+    top: 32mm;
+    width: 65mm;
+}
+
+.info-row {
+    height: 9mm;
+}
+
+.info-label {
+    font-size: 7pt;
+}
+
+.info-value {
+    font-size: 10pt;
+}
+
+.body-content {
+    padding-top: 98mm;
+    margin: 0 20mm 0 25mm;
+    line-height: 4.5mm;
+}
+
+.body-content h1 {
+    font-size: 11pt;
+    font-weight: 700;
+    margin: 0 0 6.75mm 0;
+}
+
+table.line-items {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+}
+
+table.line-items thead th {
+    font-weight: 700;
+    font-size: 8pt;
+    text-align: left;
+    border-bottom: 0.4pt solid #000;
+    padding: 0 0 2mm 0;
+}
+
+table.line-items th.num,
+table.line-items td.num {
+    text-align: right;
+    white-space: nowrap;
+    padding-left: 5mm;
+}
+
+table.line-items col.col-desc {
+    width: auto;
+}
+
+table.line-items col.col-qty,
+table.line-items col.col-price,
+table.line-items col.col-vat,
+table.line-items col.col-amount {
+    width: 1%;
+}
+
+table.line-items td {
+    padding: 1mm 0 0 0;
+    vertical-align: top;
+}
+
+table.line-items tbody tr.line-item-row {
+    break-inside: avoid;
+}
+
+table.line-items tbody tr:last-child td {
+    padding-bottom: 2mm;
+    border-bottom: 0.4pt solid #000;
+}
+
+.totals {
+    margin-top: 4.5mm;
+    break-inside: avoid;
+}
+
+.totals-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.totals-row.bold {
+    font-weight: 700;
+}
+
+.notes {
+    margin-top: 4.5mm;
+    white-space: pre-wrap;
+}
+
+.payment-instruction {
+    margin-top: 2.25mm;
+}
+
+.bank-details {
+    margin-top: 2.25mm;
+    break-inside: avoid;
+}

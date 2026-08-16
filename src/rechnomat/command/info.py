@@ -11,10 +11,11 @@ class InfoCommand:
 
     def run(self, context: Context) -> None:
         rows = [
-            ("rechnomat executable", context.rechnomat_executable),
-            ("seller dir", context.paths.seller_dir),
+            ("executable", context.rechnomat_executable),
             ("customers dir", context.paths.customers_dir),
             ("invoices dir", context.paths.invoices_dir),
+            ("seller dir", context.paths.seller_dir),
+            ("templates dir", context.paths.templates_dir),
         ]
         ui.header("Configuration", first=True)
         ui.table(

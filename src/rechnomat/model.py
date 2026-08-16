@@ -30,6 +30,10 @@ class Paths:
     def invoices_dir(self) -> Path:
         return self.root / "invoices"
 
+    @property
+    def templates_dir(self) -> Path:
+        return self.root / "templates"
+
     def customer_file(self, customer_name: str) -> Path:
         return self.customers_dir / f"{customer_name}.yml"
 
