@@ -115,7 +115,15 @@ def _draw_info_block(canvas: Canvas, *, invoice: Invoice) -> None:
 def wrap_text(text: str, *, font: str, size: float, max_width: float) -> list[str]:
     """
     Greedily word-wrap `text` into lines that each fit within `max_width` at the given font/size.
+    Explicit line breaks (\\n) in `text` are preserved as paragraph breaks.
     """
+    lines = []
+    for paragraph in text.split("\n"):
+        lines.extend(_wrap_paragraph(paragraph, font=font, size=size, max_width=max_width))
+    return lines
+
+
+def _wrap_paragraph(text: str, *, font: str, size: float, max_width: float) -> list[str]:
     words = text.split()
     if not words:
         return [""]
