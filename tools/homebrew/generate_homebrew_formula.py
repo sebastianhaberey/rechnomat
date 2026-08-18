@@ -12,6 +12,7 @@ import requests
 import urllib3
 from packaging.markers import Environment, default_environment
 from packaging.requirements import Requirement
+from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 
 
@@ -70,15 +71,60 @@ def fetch_pypi_metadata(package: str, version: str | None = None) -> dict:
     return resp.json()
 
 
-def get_url(meta: dict, packagetype: str) -> dict:
-    """
-    Choose best download url from metadata: prefers py3-none-any wheels, then other wheels, then sdist.
-    """
+def find_url(meta: dict, packagetype: str) -> dict | None:
+    """Find a download url of the given packagetype in metadata, or None if there isn't one."""
     for url in meta["urls"]:
         if url["packagetype"] == packagetype:
             return url
 
-    raise RuntimeError(f"No usable distribution for root package {meta['info']['name']}.")
+    return None
+
+
+def get_url(meta: dict, packagetype: str) -> dict:
+    """Choose a download url of the given packagetype from metadata, raising if there isn't one."""
+    url = find_url(meta, packagetype)
+    if url is None:
+        raise RuntimeError(f"No usable {packagetype} distribution for {meta['info']['name']}.")
+
+    return url
+
+
+def is_macos_arm64_tag(platform_tag: str) -> bool:
+    return platform_tag.startswith("macosx") and ("arm64" in platform_tag or "universal2" in platform_tag)
+
+
+def is_linux_x86_64_tag(platform_tag: str) -> bool:
+    return "linux" in platform_tag and platform_tag.endswith("x86_64")
+
+
+def get_wheel_urls_for_platforms(meta: dict) -> dict[str, dict]:
+    """
+    Resolve one wheel per Homebrew bottle platform we build for (macOS arm64, Linux x86_64), for
+    packages that don't publish an sdist and so can't go through brew's normal
+    virtualenv_install_with_resources build-from-source path.
+    """
+    predicates = {
+        "macos_arm64": is_macos_arm64_tag,
+        "linux_x86_64": is_linux_x86_64_tag,
+    }
+    resolved: dict[str, dict] = {}
+
+    for url in meta["urls"]:
+        if url["packagetype"] != "bdist_wheel":
+            continue
+
+        _, _, _, tags = parse_wheel_filename(url["filename"])
+        for platform_key, predicate in predicates.items():
+            if platform_key not in resolved and any(predicate(tag.platform) for tag in tags):
+                resolved[platform_key] = {"url": url["url"], "sha256": url["digests"]["sha256"]}
+
+    missing = predicates.keys() - resolved.keys()
+    if missing:
+        raise RuntimeError(
+            f"No wheel found for {meta['info']['name']} matching platform(s): {', '.join(sorted(missing))}."
+        )
+
+    return resolved
 
 
 def build_marker_env(target_python_version: str) -> Environment:
@@ -104,7 +150,8 @@ def get_matching_version(metadata: dict, requirement: Requirement) -> str | None
 
 def resolve_dependencies_from_pypi(root_package: str, root_version: str, python_version: str) -> dict[str, dict]:
     """
-    Returns mapping: package -> { "version": ..., "url": ..., "sha256": ... }
+    Returns mapping: package -> { "kind": "sdist", "version": ..., "url": ..., "sha256": ... }
+    or (for wheel-only packages) package -> { "kind": "wheel", "version": ..., "platforms": {...} }
     """
 
     env = build_marker_env(python_version)
@@ -123,10 +170,31 @@ def resolve_dependencies_from_pypi(root_package: str, root_version: str, python_
 
         if name == root_package:
             url = get_url(metadata, "sdist")  # use sdist for root package (required for brew)
+            resolved[name] = {
+                "kind": "sdist",
+                "version": version,
+                "url": url["url"],
+                "sha256": url["digests"]["sha256"],
+            }
         else:
-            url = get_url(metadata, "bdist_wheel")  # use wheel for dependencies
-
-        resolved[name] = {"version": version, "url": url["url"], "sha256": url["digests"]["sha256"]}
+            # brew's virtualenv_install_with_resources extracts each resource archive and runs
+            # `pip install <extracted_dir>`, which requires a source distribution. Prefer sdist;
+            # if a dependency doesn't publish one (e.g. playwright), fall back to per-platform
+            # wheels installed directly (see generate_formula/{{WHEEL_RESOURCES}}).
+            sdist_url = find_url(metadata, "sdist")
+            if sdist_url:
+                resolved[name] = {
+                    "kind": "sdist",
+                    "version": version,
+                    "url": sdist_url["url"],
+                    "sha256": sdist_url["digests"]["sha256"],
+                }
+            else:
+                resolved[name] = {
+                    "kind": "wheel",
+                    "version": version,
+                    "platforms": get_wheel_urls_for_platforms(metadata),
+                }
 
         requires_dist = info.get("requires_dist") or []
         for requirement_str in requires_dist:
@@ -152,20 +220,50 @@ def generate_formula(
 ) -> str:
     """Generate final formula text."""
     resource_blocks = []
+    wheel_resource_blocks = []
+    wheel_names = []
 
     for name, info in sorted(metadata.items()):
         if name.lower() == package.lower():
             continue
 
-        block = f"""
+        if info["kind"] == "sdist":
+            block = f"""
 resource "{name}" do
   url "{info["url"]}"
   sha256 "{info["sha256"]}"
 end
-        """
-        resource_blocks.append(textwrap.indent(block.strip(), "  "))
+            """
+            resource_blocks.append(textwrap.indent(block.strip(), "  "))
+        else:
+            macos = info["platforms"]["macos_arm64"]
+            linux = info["platforms"]["linux_x86_64"]
+            block = f"""
+resource "{name}" do
+  on_macos do
+    on_arm do
+      url "{macos["url"]}"
+      sha256 "{macos["sha256"]}"
+    end
+  end
+  on_linux do
+    url "{linux["url"]}"
+    sha256 "{linux["sha256"]}"
+  end
+end
+            """
+            wheel_resource_blocks.append(textwrap.indent(block.strip(), "  "))
+            wheel_names.append(name)
 
     resources_text = "\n\n".join(resource_blocks)
+    wheel_resources_text = "\n\n".join(wheel_resource_blocks)
+    without_resources = "[" + ", ".join(f'"{name}"' for name in wheel_names) + "]"
+    wheel_install_steps = "\n".join(
+        f'    resource("{name}").fetch\n'
+        f'    system libexec/"bin/pip", "install", "--no-deps", resource("{name}").cached_download'
+        for name in wheel_names
+    )
+
     root = metadata[package]
 
     if bottle:
@@ -189,6 +287,9 @@ end
         template.replace("{{URL}}", root["url"])
         .replace("{{SHA256}}", root["sha256"])
         .replace("{{RESOURCES}}", resources_text)
+        .replace("{{WHEEL_RESOURCES}}", wheel_resources_text)
+        .replace("{{WITHOUT_RESOURCES}}", without_resources)
+        .replace("{{WHEEL_INSTALL_STEPS}}", wheel_install_steps)
         .replace("{{PYTHON_VERSION}}", major_minor(python_version))
         .replace("{{BOTTLES_BLOCK}}", bottles_block)
     )
