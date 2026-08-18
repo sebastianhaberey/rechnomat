@@ -186,7 +186,7 @@ jobs:
       - name: Install generator dependencies
         run: |
           pip install --upgrade pip
-          pip install requests packaging urllib3
+          pip install ".[release]"
 
       - name: Generate Homebrew Formula
         run: |
@@ -269,7 +269,7 @@ jobs:
       - name: Install generator dependencies
         run: |
           pip install --upgrade pip
-          pip install requests packaging urllib3
+          pip install ".[release]"
 
       - name: Generate Homebrew formula
         run: |
@@ -397,7 +397,7 @@ jobs:
       - name: Install generator dependencies
         run: |
           pip install --upgrade pip
-          pip install requests packaging urllib3
+          pip install ".[release]"
 
       - name: Checkout Homebrew tap
         uses: actions/checkout@v6

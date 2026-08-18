@@ -50,6 +50,11 @@ dev = [
     "pytest==9.1.1",
     "ruff==0.16.3",
 ]
+release = [
+    "packaging==26.3",
+    "requests==2.34.2",
+    "urllib3==2.7.0",
+]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
