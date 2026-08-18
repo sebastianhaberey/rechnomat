@@ -69,7 +69,7 @@ jobs:
             LIVE=false
             REASON="not on main branch"
           fi
-
+          
           echo "live=$LIVE" >> $GITHUB_OUTPUT
           echo "::notice::Trigger ref: $GITHUB_REF, live mode: $LIVE ($REASON)"
 
@@ -99,7 +99,7 @@ jobs:
           echo "Checking PyPI for $PKG==$VERSION"
 
           JSON=$(curl -s "https://pypi.org/pypi/$PKG/json")
-
+          
           if echo "$JSON" | jq -e --arg V "$VERSION" '.releases[$V] | length > 0' > /dev/null; then
             echo "::notice::Version $VERSION is already on PyPI"
             echo "already=true" >> "$GITHUB_OUTPUT"
@@ -142,32 +142,186 @@ jobs:
           VERSION="${{ needs.discover.outputs.version }}"
           MAX_ATTEMPTS=30
           SLEEP=5
-
+          
           echo "Waiting for $PKG==$VERSION to become available on PyPI…"
-
+          
           for attempt in $(seq 1 $MAX_ATTEMPTS); do
             echo "Attempt $attempt/$MAX_ATTEMPTS…"
-
+          
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
               "https://pypi.org/pypi/$PKG/$VERSION/json")
-
+          
             if [[ "$STATUS" == "200" ]]; then
               echo "PyPI now serves version $VERSION ✔"
               exit 0
             fi
-
+          
             sleep $SLEEP
           done
-
+          
           echo "::error::Timed out waiting for $PKG==$VERSION on PyPI"
           exit 1
+
+
+  macos-bottle:
+    name: Create macOS bottle
+    runs-on: macos-15
+    # wait for these jobs to complete, also only the jobs in here are available for reference with needs.xyz
+    needs: [ discover, publish_pypi ]
+    # job isn't triggered if publish_pypi skips, so we need this extra condition
+    if: ${{ always() && needs.discover.result == 'success' && (needs.publish_pypi.result == 'success' || needs.publish_pypi.result == 'skipped') }}
+    outputs:
+      file: ${{ steps.build-bottle.outputs.file }}
+      platform: ${{ steps.build-bottle.outputs.platform }}
+
+    steps:
+      - name: Checkout HEAD (for tooling)
+        uses: actions/checkout@v6
+
+      - name: Set up Python for Formula generator
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install generator dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests packaging urllib3
+
+      - name: Generate Homebrew Formula
+        run: |
+          mkdir -p tap/Formula
+          python tools/homebrew/generate_homebrew_formula.py \
+            --package "${{ env.PACKAGE_NAME }}" \
+            --version "${{ needs.discover.outputs.version }}" \
+            --python-version "${{ env.PYTHON_VERSION }}" \
+            --template tools/homebrew/rechnomat.rb.template \
+            --output tap/Formula/rechnomat.rb
+
+          echo "Created local Formula:"
+          cat tap/Formula/rechnomat.rb
+
+      - name: Create local tap
+        working-directory: tap
+        run: |
+          git init .
+          git add Formula/rechnomat.rb
+          git commit -m "Add formula"
+
+      - name: Build bottle
+        id: build-bottle
+        run: |
+          brew tap local/rechnomat ./tap
+          brew trust local/rechnomat
+          brew install --build-bottle rechnomat
+          brew bottle rechnomat
+
+          # rename file to conform with brew standard
+          SOURCE_FILE="$(ls *.bottle*.tar.gz)"
+          PLATFORM=$(echo "$SOURCE_FILE" | sed -E 's/.*\.(.*)\.bottle.*/\1/')
+          VERSION="${{ needs.discover.outputs.version }}"
+          TARGET_FILE="rechnomat-${VERSION}.${PLATFORM}.bottle.tar.gz"
+          mv "$SOURCE_FILE" "$TARGET_FILE"
+
+          echo "file=$TARGET_FILE" >> "$GITHUB_OUTPUT"
+          echo "platform=$PLATFORM" >> "$GITHUB_OUTPUT"
+
+      - name: Upload macOS bottle
+        uses: actions/upload-artifact@v6
+        with:
+          name: bottle-macos
+          path: ${{ steps.build-bottle.outputs.file }}
+          if-no-files-found: error
+
+
+  linux-bottle:
+    runs-on: ubuntu-latest
+    name: Create Linux bottle
+    needs: [ discover, publish_pypi ]
+    if: ${{ always() && needs.discover.result == 'success' && (needs.publish_pypi.result == 'success' || needs.publish_pypi.result == 'skipped') }}
+    outputs:
+      file: ${{ steps.build-bottle.outputs.file }}
+      platform: ${{ steps.build-bottle.outputs.platform }}
+
+    steps:
+      - name: Checkout HEAD (for tooling)
+        uses: actions/checkout@v6
+
+      - name: Install Linuxbrew
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl file git
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Add Linuxbrew to PATH
+        run: |
+          echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+          echo "/home/linuxbrew/.linuxbrew/sbin" >> "$GITHUB_PATH"
+          echo "HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew" >> "$GITHUB_ENV"
+          echo "HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar" >> "$GITHUB_ENV"
+          echo "HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew" >> "$GITHUB_ENV"
+
+      - name: Set up Python for Formula generator
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install generator dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests packaging urllib3
+
+      - name: Generate Homebrew formula
+        run: |
+          mkdir -p tap/Formula
+          python tools/homebrew/generate_homebrew_formula.py \
+            --package "${{ env.PACKAGE_NAME }}" \
+            --version "${{ needs.discover.outputs.version }}" \
+            --python-version "${{ env.PYTHON_VERSION }}" \
+            --template tools/homebrew/rechnomat.rb.template \
+            --output tap/Formula/rechnomat.rb
+
+          echo "Created local Formula:"
+          cat tap/Formula/rechnomat.rb
+
+      - name: Create local tap
+        working-directory: tap
+        run: |
+          git init .
+          git add Formula/rechnomat.rb
+          git commit -m "Add formula"
+
+      - name: Build bottle
+        id: build-bottle
+        run: |
+          brew tap local/rechnomat ./tap
+          brew trust local/rechnomat
+          brew install --build-bottle rechnomat
+          brew bottle rechnomat
+
+          # rename file to conform with brew standard
+          SOURCE_FILE="$(ls *.bottle*.tar.gz)"
+          PLATFORM=$(echo "$SOURCE_FILE" | sed -E 's/.*\.(.*)\.bottle.*/\1/')
+          VERSION="${{ needs.discover.outputs.version }}"
+          TARGET_FILE="rechnomat-${VERSION}.${PLATFORM}.bottle.tar.gz"
+          mv "$SOURCE_FILE" "$TARGET_FILE"
+
+          echo "file=$TARGET_FILE" >> "$GITHUB_OUTPUT"
+          echo "platform=$PLATFORM" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Linux bottle
+        uses: actions/upload-artifact@v6
+        with:
+          name: bottle-linux
+          path: ${{ steps.build-bottle.outputs.file }}
+          if-no-files-found: error
 
 
   update-release:
     runs-on: ubuntu-latest
     name: Update release
-    needs: [ discover, publish_pypi ]
-    if: ${{ always() && needs.discover.result == 'success' && (needs.publish_pypi.result == 'success' || needs.publish_pypi.result == 'skipped') }}
+    needs: [ discover, macos-bottle, linux-bottle ]
+    if: ${{ always() && needs.macos-bottle.result == 'success' && needs.linux-bottle.result == 'success' }}
 
     steps:
       - name: Checkout HEAD (for tooling)
@@ -181,19 +335,206 @@ jobs:
           ref: ${{ needs.discover.outputs.sha }}
           path: tag
 
+      - name: Download macOS bottle
+        uses: actions/download-artifact@v8
+        with:
+          name: bottle-macos
+          path: bottles
+
+      - name: Download Linux bottle
+        uses: actions/download-artifact@v8
+        with:
+          name: bottle-linux
+          path: bottles
+
       - name: Extract changelog for this version
         id: changelog
         working-directory: tag
         run: |
           python ../head/tools/changelog/extract_changelog.py CHANGELOG.md "${{ needs.discover.outputs.version }}" > ../changelog.txt
           echo "changelog_path=changelog.txt" >> "$GITHUB_OUTPUT"
-
+          
           echo "Extracted changelog:"
           cat ../changelog.txt
 
-      - name: Create/update GitHub Release (live mode)
+      - name: Upload bottles to GitHub Release (live mode)
         if: ${{ needs.discover.outputs.live == 'true' }}
         uses: softprops/action-gh-release@v3
         with:
+          files: |
+            bottles/*.bottle*.tar.gz
           tag_name: "${{ needs.discover.outputs.tag }}"
           body_path: ${{ steps.changelog.outputs.changelog_path }}
+
+
+  update-homebrew:
+    name: Update Homebrew
+    runs-on: ubuntu-latest
+    needs: [ discover, macos-bottle, linux-bottle, update-release ]
+    if: ${{ always() && needs.update-release.result == 'success' }}
+
+    steps:
+      - name: Checkout tooling (HEAD)
+        uses: actions/checkout@v6
+
+      - name: Download macOS bottle
+        uses: actions/download-artifact@v8
+        with:
+          name: bottle-macos
+          path: bottles
+
+      - name: Download Linux bottle
+        uses: actions/download-artifact@v8
+        with:
+          name: bottle-linux
+          path: bottles
+
+      - name: Set up Python for Formula generator
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install generator dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests packaging urllib3
+
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v6
+        with:
+          repository: sebastianhaberey/homebrew-rechnomat
+          path: tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: Generate updated formula with bottles
+        run: |
+          TAG="v${{ needs.discover.outputs.version }}"
+          
+          if [[ "${{ needs.discover.outputs.live }}" == "true" ]]; then
+            BOTTLE_ROOT_URL="https://github.com/${{ github.repository }}/releases/download/$TAG"
+          else
+            ROOT_DIR=$(realpath "bottles")
+            BOTTLE_ROOT_URL="file://$ROOT_DIR"
+          fi
+          
+          echo "Bottle root URL: $BOTTLE_ROOT_URL"
+
+          python tools/homebrew/generate_homebrew_formula.py \
+            --package "${{ env.PACKAGE_NAME }}" \
+            --version "${{ needs.discover.outputs.version }}" \
+            --python-version "${{ env.PYTHON_VERSION }}" \
+            --template tools/homebrew/rechnomat.rb.template \
+            --output tap/Formula/rechnomat.rb \
+            --bottle-macos-path "bottles/${{ needs.macos-bottle.outputs.file }}" \
+            --bottle-linux-path "bottles/${{ needs.linux-bottle.outputs.file }}" \
+            --bottle-root-url "$BOTTLE_ROOT_URL"
+          
+          echo "Created final Formula:"
+          cat tap/Formula/rechnomat.rb
+
+      - name: Upload Formula for verify step (dry run)
+        if: ${{ needs.discover.outputs.live == 'false' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: formula
+          path: tap/Formula/rechnomat.rb
+
+      - name: Commit and push tap update (live mode)
+        if: ${{ needs.discover.outputs.live == 'true' }}
+        working-directory: tap
+        run: |
+          git add Formula/rechnomat.rb
+          git commit -m "Update Formula for rechnomat ${{ needs.discover.outputs.version }}" || echo "No changes"
+          git push
+
+
+  verify-dry-run:
+    name: Verify (dry run)
+    runs-on: ubuntu-latest
+    needs: [ discover, update-homebrew ]
+    if: ${{ always() && needs.update-homebrew.result == 'success' && needs.discover.outputs.live == 'false' }}
+
+    steps:
+      - name: Install Linuxbrew
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl file git
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Add Linuxbrew to PATH
+        run: |
+          echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+          echo "/home/linuxbrew/.linuxbrew/sbin" >> "$GITHUB_PATH"
+          echo "HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew" >> "$GITHUB_ENV"
+          echo "HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar" >> "$GITHUB_ENV"
+          echo "HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew" >> "$GITHUB_ENV"
+
+      - name: Download macOS bottle
+        uses: actions/download-artifact@v8
+        with:
+          name: bottle-macos
+          path: bottles
+
+      - name: Download Linux bottle
+        uses: actions/download-artifact@v8
+        with:
+          name: bottle-linux
+          path: bottles
+
+      - name: Download Formula
+        uses: actions/download-artifact@v8
+        with:
+          name: formula
+          path: tap/Formula
+
+      - name: Init tap
+        working-directory: tap
+        run: |
+          git init .
+          git add .
+          git commit -m "Add formula"
+
+      - name: Install tap
+        run: |
+          brew tap local/rechnomat ./tap
+          brew trust local/rechnomat
+          brew install rechnomat
+
+      - name: Verify tap
+        run: |
+          which rechnomat
+          rechnomat --version
+          rechnomat info
+
+  verify-live:
+    name: Verify (live mode)
+    runs-on: ubuntu-latest
+    needs: [ discover,update-homebrew ]
+    if: ${{ always() && needs.update-homebrew.result == 'success' && needs.discover.outputs.live == 'true' }}
+
+    steps:
+      - name: Install Linuxbrew
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl file git
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Add Linuxbrew to PATH
+        run: |
+          echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+          echo "/home/linuxbrew/.linuxbrew/sbin" >> "$GITHUB_PATH"
+          echo "HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew" >> "$GITHUB_ENV"
+          echo "HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar" >> "$GITHUB_ENV"
+          echo "HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew" >> "$GITHUB_ENV"
+
+      - name: Download tap
+        run: |
+          brew tap sebastianhaberey/rechnomat
+          brew trust sebastianhaberey/rechnomat
+          brew install rechnomat
+
+      - name: Verify tap
+        run: |
+          which rechnomat
+          rechnomat --version
+          rechnomat info
