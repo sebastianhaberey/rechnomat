@@ -13,8 +13,11 @@ class Rechnomat < Formula
 
 {{RESOURCES}}
 
+{{WHEEL_RESOURCES}}
+
   def install
-    virtualenv_install_with_resources
+    virtualenv_install_with_resources without: {{WITHOUT_RESOURCES}}
+{{WHEEL_INSTALL_STEPS}}
   end
 
   test do
