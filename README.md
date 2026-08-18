@@ -4,17 +4,57 @@ Create invoices compliant with German E-Rechnung laws.
 
 ## Installation
 
+### macOS
+
+Using [Homebrew](https://brew.sh/):
+
 ```
-git clone https://github.com/sebastianhaberey/rechnomat.git
-cd rechnomat
-pip install .
+brew install sebastianhaberey/rechnomat/rechnomat
+```
+
+Or with pip (requires Python 3.14+):
+
+```
+pip install rechnomat
+```
+
+### Linux (Debian / Fedora)
+
+Requires Python 3.14+.
+
+Debian / Ubuntu:
+
+```
+sudo apt install python3 python3-pip
+pip install rechnomat
+```
+
+Fedora:
+
+```
+sudo dnf install python3 python3-pip
+pip install rechnomat
+```
+
+[Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux) is also supported:
+
+```
+brew install sebastianhaberey/rechnomat/rechnomat
+```
+
+### Windows
+
+Install [Python 3.14+](https://www.python.org/downloads/windows/), then:
+
+```
+pip install rechnomat
 ```
 
 Invoice PDFs are rendered from HTML/CSS templates using
 [WeasyPrint](https://weasyprint.org/), a pure-Python PDF rendering engine with no native system
 dependencies to install.
 
-### Getting started
+## Getting started
 
 The tool reads `backgrounds/`, `customers/`, `invoices/`, `seller/` and `templates/` from the
 current directory, not from the installed package. Before running `rechnomat render-invoice`, run
@@ -31,19 +71,7 @@ rechnomat --help
 
 ## Development
 
-For an editable install with test and lint tooling:
-
-```
-pip install -e '.[dev]'
-```
-
-Tests use the example data and templates bundled in `src/rechnomat/resources/` directly.
-
-```
-pytest
-ruff check .
-ruff format --check .
-```
+See [documentation/DEVELOPMENT.md](documentation/DEVELOPMENT.md).
 
 ## License
 
