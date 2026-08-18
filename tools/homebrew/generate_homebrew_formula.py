@@ -97,11 +97,22 @@ def is_linux_x86_64_tag(platform_tag: str) -> bool:
     return "linux" in platform_tag and platform_tag.endswith("x86_64")
 
 
-def get_wheel_urls_for_platforms(meta: dict) -> dict[str, dict]:
+def matches_interpreter(tag, python_version: str) -> bool:
     """
-    Resolve one wheel per Homebrew bottle platform we build for (macOS arm64, Linux x86_64), for
-    packages that don't publish an sdist and so can't go through brew's normal
-    virtualenv_install_with_resources build-from-source path.
+    True if a wheel tag is usable with target_python_version: either interpreter-agnostic
+    ("py3"/"none"/"abi3", e.g. playwright) or built for that exact CPython version's regular
+    (non-free-threaded) ABI, e.g. "cp314-cp314-..." but not "cp314-cp314t-...".
+    """
+    cpython_tag = "cp" + major_minor(python_version).replace(".", "")
+    return tag.interpreter in ("py3", cpython_tag) and tag.abi in ("none", "abi3", cpython_tag)
+
+
+def get_wheel_urls_for_platforms(meta: dict, python_version: str) -> dict[str, dict]:
+    """
+    Resolve one wheel per Homebrew bottle platform we build for (macOS arm64, Linux x86_64) and
+    matching python_version, for packages that can't go through brew's normal
+    virtualenv_install_with_resources build-from-source path (no sdist, or an sdist that can't
+    be built in Homebrew's sandbox).
     """
     predicates = {
         "macos_arm64": is_macos_arm64_tag,
@@ -114,8 +125,10 @@ def get_wheel_urls_for_platforms(meta: dict) -> dict[str, dict]:
             continue
 
         _, _, _, tags = parse_wheel_filename(url["filename"])
+        matching_tags = [tag for tag in tags if matches_interpreter(tag, python_version)]
+
         for platform_key, predicate in predicates.items():
-            if platform_key not in resolved and any(predicate(tag.platform) for tag in tags):
+            if platform_key not in resolved and any(predicate(tag.platform) for tag in matching_tags):
                 resolved[platform_key] = {"url": url["url"], "sha256": url["digests"]["sha256"]}
 
     missing = predicates.keys() - resolved.keys()
@@ -146,6 +159,13 @@ def get_matching_version(metadata: dict, requirement: Requirement) -> str | None
             return str(version)
 
     raise RuntimeError(f"Could not find version satisfying {requirement} for {requirement.name}")
+
+
+# Packages that publish an sdist, but whose build can't run in Homebrew's sandboxed build phase
+# (e.g. pydantic_core needs the Rust-based maturin build backend, which itself needs network
+# access to fetch crates - unavailable mid-build). These always resolve to per-platform wheels
+# instead, even though an sdist technically exists.
+FORCE_WHEEL_PACKAGES = {"pydantic_core"}
 
 
 def resolve_dependencies_from_pypi(root_package: str, root_version: str, python_version: str) -> dict[str, dict]:
@@ -179,9 +199,10 @@ def resolve_dependencies_from_pypi(root_package: str, root_version: str, python_
         else:
             # brew's virtualenv_install_with_resources extracts each resource archive and runs
             # `pip install <extracted_dir>`, which requires a source distribution. Prefer sdist;
-            # if a dependency doesn't publish one (e.g. playwright), fall back to per-platform
-            # wheels installed directly (see generate_formula/{{WHEEL_RESOURCES}}).
-            sdist_url = find_url(metadata, "sdist")
+            # if a dependency doesn't publish one (e.g. playwright) or can't be built from one in
+            # Homebrew's sandbox (FORCE_WHEEL_PACKAGES), fall back to per-platform wheels
+            # installed directly (see generate_formula/{{WHEEL_RESOURCES}}).
+            sdist_url = None if name in FORCE_WHEEL_PACKAGES else find_url(metadata, "sdist")
             if sdist_url:
                 resolved[name] = {
                     "kind": "sdist",
@@ -193,7 +214,7 @@ def resolve_dependencies_from_pypi(root_package: str, root_version: str, python_
                 resolved[name] = {
                     "kind": "wheel",
                     "version": version,
-                    "platforms": get_wheel_urls_for_platforms(metadata),
+                    "platforms": get_wheel_urls_for_platforms(metadata, python_version),
                 }
 
         requires_dist = info.get("requires_dist") or []
