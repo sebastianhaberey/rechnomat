@@ -35,7 +35,7 @@ a valid e-invoice.
 
 ## Suggested stack
 
-- PDF content rendering: `playwright`
+- PDF content rendering: `weasyprint`
 - PDF merging (background + content): `pypdf`
 - EN 16931 XML modeling: `drafthorse`
 - XML embedding + PDF/A-3 conversion: `factur-x`

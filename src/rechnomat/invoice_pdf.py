@@ -1,8 +1,8 @@
 from io import BytesIO
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
 from pypdf import PdfReader, PdfWriter
+from weasyprint import HTML
 
 from rechnomat.invoice_html import render_invoice_html
 from rechnomat.model import Customer, Invoice, Seller
@@ -27,19 +27,8 @@ def render_invoice_pdf(
         invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller, template_dir=template_dir
     )
 
-    with sync_playwright() as playwright:
-        # page.pdf() only works in headless mode.
-        browser = playwright.chromium.launch()
-        try:
-            page = browser.new_page()
-            page.set_content(html)
-            pdf_bytes = page.pdf(
-                format="A4",
-                print_background=True,
-                margin={"top": "0mm", "right": "0mm", "bottom": "0mm", "left": "0mm"},
-            )
-        finally:
-            browser.close()
+    # Page size and zero margin come from the `@page` rule in template.css.
+    pdf_bytes = HTML(string=html).write_pdf()
 
     if background_path is not None:
         pdf_bytes = _merge_background(pdf_bytes, background_path)

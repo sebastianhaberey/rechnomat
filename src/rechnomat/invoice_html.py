@@ -17,8 +17,8 @@ def render_invoice_html(
 ) -> str:
     """
     Render `invoice` as a fully self-contained HTML string (CSS inlined, fonts embedded as base64
-    data URIs) using the template.html + template.css found in `template_dir`. Does no browser
-    rendering - see invoice_pdf.render_invoice_pdf for the Playwright/PDF step.
+    data URIs) using the template.html + template.css found in `template_dir`. Does no PDF
+    rendering - see invoice_pdf.render_invoice_pdf for the PDF-rendering step.
     """
     context = _build_context(invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller)
     context["inline_css"] = _read_css_with_embedded_fonts(template_dir)

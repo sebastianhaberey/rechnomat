@@ -34,9 +34,6 @@ jobs:
           pip install -e .
           pip install ".[dev]"
 
-      - name: Install Playwright browser (Chromium)
-        run: playwright install chromium
-
       - name: Run ruff (lint)
         run: ruff check .
 
