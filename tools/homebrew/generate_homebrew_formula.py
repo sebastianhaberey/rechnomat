@@ -121,10 +121,10 @@ def resolve_dependencies_from_pypi(root_package: str, root_version: str, python_
         info = metadata["info"]
         name = info["name"]
 
-        # brew's virtualenv_install_with_resources extracts each resource archive and runs
-        # `pip install <extracted_dir>`, which requires a source distribution (setup.py/pyproject.toml).
-        # A wheel extracted this way has no such file and fails to install, so always use sdist.
-        url = get_url(metadata, "sdist")
+        if name == root_package:
+            url = get_url(metadata, "sdist")  # use sdist for root package (required for brew)
+        else:
+            url = get_url(metadata, "bdist_wheel")  # use wheel for dependencies
 
         resolved[name] = {"version": version, "url": url["url"], "sha256": url["digests"]["sha256"]}
 
