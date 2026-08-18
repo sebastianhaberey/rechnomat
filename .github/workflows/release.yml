@@ -212,9 +212,10 @@ jobs:
         id: build-bottle
         run: |
           brew tap local/rechnomat ./tap
+          brew trust local/rechnomat
           brew install --build-bottle rechnomat
           brew bottle rechnomat
-          
+
           # rename file to conform with brew standard
           SOURCE_FILE="$(ls *.bottle*.tar.gz)"
           PLATFORM=$(echo "$SOURCE_FILE" | sed -E 's/.*\.(.*)\.bottle.*/\1/')
@@ -294,9 +295,10 @@ jobs:
         id: build-bottle
         run: |
           brew tap local/rechnomat ./tap
+          brew trust local/rechnomat
           brew install --build-bottle rechnomat
           brew bottle rechnomat
-          
+
           # rename file to conform with brew standard
           SOURCE_FILE="$(ls *.bottle*.tar.gz)"
           PLATFORM=$(echo "$SOURCE_FILE" | sed -E 's/.*\.(.*)\.bottle.*/\1/')
@@ -495,6 +497,7 @@ jobs:
       - name: Install tap
         run: |
           brew tap local/rechnomat ./tap
+          brew trust local/rechnomat
           brew install rechnomat
 
       - name: Verify tap
@@ -527,6 +530,7 @@ jobs:
       - name: Download tap
         run: |
           brew tap sebastianhaberey/rechnomat
+          brew trust sebastianhaberey/rechnomat
           brew install rechnomat
 
       - name: Verify tap
