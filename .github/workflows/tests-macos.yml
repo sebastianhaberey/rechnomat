@@ -29,7 +29,9 @@ jobs:
             macos-pip-
 
       - name: Install Pango (required by WeasyPrint)
-        run: brew install pango
+        run: |
+          brew install pango
+          echo "DYLD_LIBRARY_PATH=$(brew --prefix)/lib" >> "$GITHUB_ENV"
 
       - name: Install Python dependencies
         run: |
