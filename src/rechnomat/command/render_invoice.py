@@ -1,6 +1,7 @@
 from rechnomat import ui
 from rechnomat.invoice_numbering import find_highest_invoice_number
-from rechnomat.invoice_pdf import render_invoice_pdf
+from rechnomat.invoice_pdf import embed_invoice_xml, render_invoice_pdf
+from rechnomat.invoice_xml import build_invoice_xml
 from rechnomat.model import Context, Customer, Invoice, Seller
 from rechnomat.yaml_io import load_model
 
@@ -52,5 +53,9 @@ class RenderInvoiceCommand:
             template_dir=template_dir,
             background_path=background_path,
         )
+
+        xml_bytes = build_invoice_xml(invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller)
+        zugferd_bytes = embed_invoice_xml(target_file.read_bytes(), xml_bytes)
+        target_file.write_bytes(zugferd_bytes)
 
         ui.success("Rendered invoice PDF", str(target_file))

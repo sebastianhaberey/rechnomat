@@ -127,6 +127,14 @@ class LineItem(BaseModel):
     unit_price_net: Decimal = Field(description="net unit price (EN 16931 BT-146)")
     vat_rate: Decimal = Field(description="percent (EN 16931 BT-152)")
 
+    @model_validator(mode="after")
+    def _check_standard_vat_rate(self) -> LineItem:
+        # only standard-rate VAT (category "S") is supported; zero/exempt/reverse-charge rates
+        # need a legal exemption reason and category code we don't yet model (EN 16931 BG-23)
+        if self.vat_rate <= 0:
+            raise ValueError("vat_rate must be positive; zero/exempt VAT rates are not supported")
+        return self
+
 
 class Layout(BaseModel):
     template: str = Field(default="de", description="selects the template directory under templates/, e.g. 'de'")

@@ -61,17 +61,6 @@ def test_compute_totals_separates_different_rates_sorted_ascending():
     assert totals.gross_total == Decimal("200.00") + Decimal("7.00") + Decimal("19.00")
 
 
-def test_compute_totals_zero_rate():
-    invoice = _invoice(
-        [{"description": "Export", "quantity": "1", "unit": "EA", "unit_price_net": "100.00", "vat_rate": "0"}]
-    )
-
-    totals = compute_totals(invoice)
-
-    assert totals.vat_groups[0].vat_amount == Decimal("0.00")
-    assert totals.gross_total == Decimal("100.00")
-
-
 def test_compute_totals_line_amounts_preserve_order_and_items():
     invoice = _invoice(
         [

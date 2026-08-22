@@ -1,9 +1,20 @@
 import importlib.resources
+import io
 
+import pikepdf
+import pytest
+from facturx import get_xml_from_pdf
+from lxml import etree
 from pypdf import PdfReader
 
-from rechnomat.invoice_pdf import render_invoice_pdf
+from rechnomat.invoice_pdf import embed_invoice_xml, render_invoice_pdf
+from rechnomat.invoice_xml import build_invoice_xml
 from rechnomat.model import Customer, Invoice, Seller
+
+_CII_NS = {
+    "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+    "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+}
 
 TEMPLATE_DIR = importlib.resources.files("rechnomat") / "resources" / "templates" / "de"
 BACKGROUND_PATH = importlib.resources.files("rechnomat") / "resources" / "backgrounds" / "letterhead.pdf"
@@ -162,7 +173,10 @@ def test_render_invoice_pdf_merges_background_behind_content(tmp_path):
     background_xobjects = set(background_page["/Resources"]["/XObject"].keys())
     rendered_xobjects = set(rendered_page["/Resources"]["/XObject"].keys())
     assert background_xobjects <= rendered_xobjects
-    assert rendered_page.mediabox == background_page.mediabox
+    # the merged page is the content page (from the @page CSS rule), not the background's stored
+    # page - both are A4 but not bit-identical, so compare approximately
+    for rendered_value, background_value in zip(rendered_page.mediabox, background_page.mediabox):
+        assert rendered_value == pytest.approx(float(background_value), abs=0.01)
 
 
 def test_render_invoice_pdf_repeats_single_page_background_across_content_pages(tmp_path):
@@ -199,3 +213,54 @@ def test_render_invoice_pdf_repeats_single_page_background_across_content_pages(
     background_xobjects = set(PdfReader(BACKGROUND_PATH).pages[0]["/Resources"]["/XObject"].keys())
     for page in reader.pages:
         assert background_xobjects <= set(page["/Resources"]["/XObject"].keys())
+
+
+def test_render_invoice_pdf_writes_pdf_a3_output(tmp_path):
+    invoice = Invoice.model_validate(BASE_INVOICE)
+    output_path = tmp_path / "invoice.pdf"
+
+    render_invoice_pdf(
+        invoice=invoice,
+        invoice_number="00000001",
+        customer=CUSTOMER,
+        seller=SELLER,
+        output_path=output_path,
+        template_dir=TEMPLATE_DIR,
+    )
+
+    with pikepdf.open(output_path) as pdf:
+        assert "/OutputIntents" in pdf.Root
+        assert str(pdf.Root.OutputIntents[0].S) == "/GTS_PDFA1"
+
+
+def test_embed_invoice_xml_produces_retrievable_attachment(tmp_path):
+    invoice = Invoice.model_validate(BASE_INVOICE)
+    content_path = tmp_path / "content.pdf"
+
+    render_invoice_pdf(
+        invoice=invoice,
+        invoice_number="00000001",
+        customer=CUSTOMER,
+        seller=SELLER,
+        output_path=content_path,
+        template_dir=TEMPLATE_DIR,
+    )
+    xml_bytes = build_invoice_xml(invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER)
+
+    zugferd_bytes = embed_invoice_xml(content_path.read_bytes(), xml_bytes)
+
+    filename, extracted_xml = get_xml_from_pdf(zugferd_bytes)
+    assert filename == "factur-x.xml"
+    root = etree.fromstring(extracted_xml)
+    invoice_id = root.xpath("//rsm:ExchangedDocument/ram:ID/text()", namespaces=_CII_NS)[0]
+    assert invoice_id == "00000001"
+    grand_total = root.xpath(
+        "//ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:GrandTotalAmount/text()", namespaces=_CII_NS
+    )[0]
+    assert grand_total == "1142.40"
+
+    with pikepdf.Pdf.open(io.BytesIO(zugferd_bytes)) as pdf:
+        assert "/OutputIntents" in pdf.Root
+        assert "/EmbeddedFiles" in pdf.Root.Names
+        af_relationships = {str(f.AFRelationship) for f in pdf.Root.AF}
+        assert af_relationships == {"/Data"}
