@@ -87,6 +87,14 @@ rechnomat --help
 
 to show all available commands and options.
 
+## Update
+
+Update rechnomat with:
+
+```
+pipx install rechnomat --force --pip-args="--no-cache-dir"
+```
+
 ## Disclaimer
 
 Even though I'm doing my best, there's **no guarantee at all** that this application will generate correct invoices. To
