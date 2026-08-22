@@ -10,7 +10,7 @@ from rechnomat.model import Context, Paths
 
 @pytest.fixture
 def context(tmp_path) -> Context:
-    return Context(debug=False, rechnomat_executable=Path("rechnomat"), paths=Paths(root=tmp_path, output_dir=tmp_path))
+    return Context(debug=False, rechnomat_executable=Path("rechnomat"), paths=Paths(root=tmp_path))
 
 
 def _setup_project(context: Context) -> None:

@@ -34,3 +34,10 @@ class InitCommand:
 
             shutil.copytree(RESOURCES_DIR / name, target_dir)
             ui.success("Replaced" if replaced else "Copied", str(target_dir))
+
+        output_dir = paths.output_dir
+        if output_dir.exists():
+            ui.warn("Skipped", f"{output_dir} (already exists)")
+        else:
+            output_dir.mkdir(parents=True)
+            ui.success("Created", str(output_dir))

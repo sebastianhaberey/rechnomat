@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field, computed_field, model_validator
 @dataclass(frozen=True, slots=True)
 class Paths:
     root: Path
-    output_dir: Path
 
     @property
     def config_file(self) -> Path:
@@ -38,6 +37,10 @@ class Paths:
     @property
     def backgrounds_dir(self) -> Path:
         return self.root / "backgrounds"
+
+    @property
+    def output_dir(self) -> Path:
+        return self.root / "output"
 
     def template_dir(self, template_name: str) -> Path:
         return self.templates_dir / template_name

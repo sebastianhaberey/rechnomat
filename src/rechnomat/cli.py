@@ -55,7 +55,7 @@ def cli(
 
     ctx.ensure_object(dict)
 
-    paths = Paths(root=Path.cwd(), output_dir=Path.cwd())
+    paths = Paths(root=Path.cwd())
     rechnomat_executable = ctx.obj.pop("rechnomat_executable", None)
 
     ctx.obj["context"] = Context(
@@ -76,7 +76,8 @@ def cli(
 @pass_obj
 def init(obj, overwrite):
     """
-    Copy the bundled example customers, invoices, seller and templates into the current directory
+    Copy the bundled example customers, invoices, seller and templates into the current directory,
+    and create an empty output directory for rendered invoices
     """
     command = InitCommand(overwrite=overwrite)
     command.run(obj["context"])

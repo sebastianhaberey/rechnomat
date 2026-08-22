@@ -8,7 +8,7 @@ from rechnomat.model import Context, Paths
 
 @pytest.fixture
 def context(tmp_path) -> Context:
-    return Context(debug=False, rechnomat_executable=Path("rechnomat"), paths=Paths(root=tmp_path, output_dir=tmp_path))
+    return Context(debug=False, rechnomat_executable=Path("rechnomat"), paths=Paths(root=tmp_path))
 
 
 def test_init_copies_all_bundled_resources(tmp_path, monkeypatch, context):
@@ -25,6 +25,7 @@ def test_init_copies_all_bundled_resources(tmp_path, monkeypatch, context):
     assert (tmp_path / "backgrounds" / "letterhead.pdf").read_bytes() == (
         RESOURCES_DIR / "backgrounds" / "letterhead.pdf"
     ).read_bytes()
+    assert (tmp_path / "output").is_dir()
 
 
 def test_init_leaves_existing_directories_untouched(tmp_path, monkeypatch, context):
@@ -62,3 +63,15 @@ def test_init_with_overwrite_replaces_existing_directories(tmp_path, monkeypatch
 
     assert not existing.exists()
     assert (customers_dir / "meier-gmbh.yml").exists()
+
+
+def test_init_leaves_existing_output_directory_untouched_even_with_overwrite(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    existing = output_dir / "DE000001.pdf"
+    existing.write_bytes(b"%PDF-fake")
+
+    InitCommand(overwrite=True).run(context)
+
+    assert existing.read_bytes() == b"%PDF-fake"

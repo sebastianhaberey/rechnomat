@@ -43,7 +43,11 @@ class RenderInvoiceCommand:
             if not background_path.exists():
                 raise RuntimeError(f"Background file not found: {background_path}")
 
-        target_file = context.paths.output_dir / f"{invoice_number}.pdf"
+        output_dir = context.paths.output_dir
+        if not output_dir.exists():
+            raise RuntimeError(f"Output directory not found: {output_dir}")
+
+        target_file = output_dir / f"{invoice_number}.pdf"
         render_invoice_pdf(
             invoice=invoice,
             invoice_number=invoice_number,
