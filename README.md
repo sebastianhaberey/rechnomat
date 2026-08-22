@@ -60,18 +60,40 @@ pipx install rechnomat
 
 ## Getting started
 
-Go to a working directory of your choice, then initialize it:
+Go to a working directory of your choice and initialize it:
 
 ```
 rechnomat init
 ```
 
-This will create subfolders for customers, invoices etc. The folders contain demo files that you can use as templates.
-Render the demo invoice to folder `output` with:
+This will create subfolders with working example files. Render the example invoice with:
 
 ```
 rechnomat render
 ```
+
+The rendered invoice will appear in the output folder. Now edit the seller, customer and invoice files with your own
+data and render again. When required, you may add new invoices using:
+
+```
+rechnomat add [customer]
+```
+
+where `[customer]` is the name of the customer file. The command will duplicate the most recent existing invoice for
+that customer, i.e. the invoice with the highest number. If you don't specify the customer, the command will duplicate
+the most recent existing invoice. If there is no existing invoice, the command will duplicate the example.
+
+The new invoice will have the next logical invoice number in sequence and the current date. You can also create a new
+invoice by manually copying an existing invoice file. The same goes for customers: create new customers by copying
+existing files.
+
+Use
+
+```
+rechnomat --help
+```
+
+to show all available commands and options.
 
 ## Disclaimer
 
