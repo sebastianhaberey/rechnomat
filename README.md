@@ -1,23 +1,51 @@
-# rechnomat
+# Rechnomat
 
 Create invoices compliant with German E-Rechnung laws.
 
 ## Installation
 
+### Prerequisites
+
 This application requires Python >= 3.14 installed. Please refer
 to [their documentation](https://www.python.org/downloads/) on how to install Python for your system.
 
-### macOS
+It also uses [WeasyPrint](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation) to render PDFs,
+which requires some native libraries.
 
-### Linux
+#### macOS
 
-#### Ubuntu
+```
+brew install pango
+```
 
-#### Debian
+#### Linux
 
-#### Fedora
+##### Ubuntu / Debian
 
-### Windows
+```
+sudo apt install libpango-1.0-0 libpangoft2-1.0-0
+```
+
+##### Fedora
+
+```
+sudo dnf install pango
+```
+
+#### Windows
+
+Install the [GTK3 runtime](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases), then
+make sure its `bin` folder is on your `PATH`.
+
+### Rechnomat
+
+Install Rechnomat itself into a virtual environment:
+
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip install rechnomat
+```
 
 ## Getting started
 
