@@ -18,6 +18,13 @@ which requires some native libraries.
 brew install pango
 ```
 
+Homebrew's libraries aren't on macOS's default library search path, so also add this to your shell
+profile (e.g. `~/.zshrc`):
+
+```
+export DYLD_LIBRARY_PATH="$(brew --prefix)/lib"
+```
+
 #### Linux
 
 ##### Ubuntu / Debian
