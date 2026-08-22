@@ -8,11 +8,15 @@ Creates invoices compliant with German E-Rechnung laws.
 
 ### Prerequisites
 
-Rechnomat requires Python >= 3.14 installed. Please refer to [their documentation](https://www.python.org/downloads/) on
-how to install Python on your system.
+Make sure you have the following dependencies installed:
 
-The application also uses [WeasyPrint](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#installation) to
-render PDFs, which requires some native libraries.
+- [Python >= 3.14](https://www.python.org/downloads/)
+- [Pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html)
+
+### WeasyPrint
+
+[WeasyPrint](https://doc.courtbouillon.org/weasyprint/stable/index.html) will be installed with Rechnomat, but you may
+need to install some libraries it requires, depending on your OS.
 
 #### macOS
 
@@ -48,21 +52,10 @@ make sure its `bin` folder is on your `PATH`.
 
 ### Rechnomat
 
-Install Rechnomat itself into a virtual environment:
+Install Rechnomat itself with [pipx](https://pipx.pypa.io/stable/installation/):
 
 ```
-mkdir rechnomat
-cd rechnomat
-python3 -m venv .venv
-source .venv/bin/activate
-pip install rechnomat
-```
-
-Whenever you re-open your terminal, you need to re-source rechnomat:
-
-```
-cd rechnomat
-source .venv/bin/activate
+pipx install rechnomat
 ```
 
 ## Getting started
