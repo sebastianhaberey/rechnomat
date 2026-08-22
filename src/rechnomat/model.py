@@ -142,10 +142,12 @@ class LineItem(BaseModel):
 
 class Layout(BaseModel):
     template: str = Field(default="de", description="selects the template directory under templates/, e.g. 'de'")
-    render_bank_details: bool = True
-    render_notes: bool = True
-    render_address_line: bool = True
-    render_return_address_line: bool = True
+    render_bank_details: bool = Field(default=True, description="show the seller's bank details on the invoice")
+    render_notes: bool = Field(default=True, description="show the notes field on the invoice")
+    render_return_address_line: bool = Field(
+        default=True,
+        description="show the small return-address line above the recipient address, for window envelopes",
+    )
     background: str | None = Field(
         default=None, description="file under backgrounds/ merged behind the content, e.g. 'letterhead.pdf'"
     )

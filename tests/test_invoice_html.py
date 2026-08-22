@@ -224,18 +224,6 @@ def test_render_invoice_html_omits_notes_when_disabled_even_if_present():
     assert "Vertraulich" not in html
 
 
-def test_render_invoice_html_omits_address_line_when_disabled():
-    invoice = Invoice.model_validate({**BASE_INVOICE, "layout": {"render_address_line": False}})
-
-    html = render_invoice_html(
-        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, template_dir=TEMPLATE_DIR
-    )
-
-    assert "Musterstrasse 12" not in html
-    assert "10115 Berlin" not in html
-    assert "Musterfirma Max Mustermann · Beispielweg 5 · 80331 Muenchen" in html
-
-
 def test_render_invoice_html_omits_return_address_line_when_disabled():
     invoice = Invoice.model_validate({**BASE_INVOICE, "layout": {"render_return_address_line": False}})
 

@@ -118,7 +118,6 @@ def test_invoice_layout_defaults_to_de_template_with_everything_rendered():
         template="de",
         render_bank_details=True,
         render_notes=True,
-        render_address_line=True,
         render_return_address_line=True,
         background=None,
     )
@@ -132,7 +131,6 @@ def test_invoice_layout_can_be_overridden():
                 "template": "en",
                 "render_bank_details": False,
                 "render_notes": False,
-                "render_address_line": False,
                 "render_return_address_line": False,
                 "background": "letterhead.pdf",
             },
@@ -141,7 +139,6 @@ def test_invoice_layout_can_be_overridden():
     assert invoice.layout.template == "en"
     assert invoice.layout.render_bank_details is False
     assert invoice.layout.render_notes is False
-    assert invoice.layout.render_address_line is False
     assert invoice.layout.render_return_address_line is False
     assert invoice.layout.background == "letterhead.pdf"
 

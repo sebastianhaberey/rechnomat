@@ -11,12 +11,10 @@
         {% if invoice.layout.render_return_address_line %}
         <span class="return-address-text">{{ return_address_line }}</span>
         {% endif %}
-        {% if invoice.layout.render_address_line %}
         <div class="address-lines">
             {% for line in address_lines %}<div>{{ line }}</div>
             {% endfor %}
         </div>
-        {% endif %}
     </div>
 
     <div class="info-block">
