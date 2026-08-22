@@ -4,69 +4,34 @@ Create invoices compliant with German E-Rechnung laws.
 
 ## Installation
 
+This application requires Python >= 3.14 installed. Please refer
+to [their documentation](https://www.python.org/downloads/) on how to install Python for your system.
+
 ### macOS
 
-Using [Homebrew](https://brew.sh/):
+### Linux
 
-```
-brew install sebastianhaberey/rechnomat/rechnomat
-```
+#### Ubuntu
 
-Or with pip (requires Python 3.14+):
+#### Debian
 
-```
-pip install rechnomat
-```
-
-### Linux (Debian / Fedora)
-
-Requires Python 3.14+.
-
-Debian / Ubuntu:
-
-```
-sudo apt install python3 python3-pip
-pip install rechnomat
-```
-
-Fedora:
-
-```
-sudo dnf install python3 python3-pip
-pip install rechnomat
-```
-
-[Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux) is also supported:
-
-```
-brew install sebastianhaberey/rechnomat/rechnomat
-```
+#### Fedora
 
 ### Windows
 
-Install [Python 3.14+](https://www.python.org/downloads/windows/), then:
-
-```
-pip install rechnomat
-```
-
-Invoice PDFs are rendered from HTML/CSS templates using
-[WeasyPrint](https://weasyprint.org/), a pure-Python PDF rendering engine with no native system
-dependencies to install.
-
 ## Getting started
 
-The tool reads `backgrounds/`, `customers/`, `invoices/`, `seller/` and `templates/` from the
-current directory, not from the installed package. Before running `rechnomat render-invoice`, run
-`rechnomat init` inside whichever directory you run `rechnomat` from; it copies these five
-folders, pre-filled with example data, from `src/rechnomat/resources/` into the current directory.
-Folders that already exist are left untouched, so re-running `init` later only fills in whatever
-is still missing; you are notified whether each folder was copied or skipped.
-
-## Usage
+Go to a working directory of your choice, then initialize it:
 
 ```
-rechnomat --help
+rechnomat init
+```
+
+This will create subfolders for customers, invoices etc. The folders contain demo files that you can use as templates.
+Render the demo invoice with:
+
+```
+rechnomat render-invoice
 ```
 
 ## Development
