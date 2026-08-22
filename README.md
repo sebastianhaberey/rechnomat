@@ -1,6 +1,8 @@
 # Rechnomat
 
-Create invoices compliant with German E-Rechnung laws.
+Creates invoices compliant with German E-Rechnung laws.
+
+[Example PDF](documentation/example.pdf)
 
 ## Installation
 
