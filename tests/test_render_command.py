@@ -114,3 +114,47 @@ def test_render_invoice_raises_when_output_directory_missing(tmp_path, monkeypat
 
     with pytest.raises(RuntimeError, match="Output directory not found"):
         RenderCommand(invoice_number="DE000001").run(context)
+
+
+def test_render_invoice_writes_pdf_to_custom_output_directory(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+    custom_dir = tmp_path / "custom-output"
+    custom_dir.mkdir()
+
+    RenderCommand(invoice_number="DE000001", output_directory=custom_dir).run(context)
+
+    assert (custom_dir / "DE000001.pdf").exists()
+    assert not (tmp_path / "output" / "DE000001.pdf").exists()
+
+
+def test_render_invoice_raises_when_custom_output_directory_missing(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+    custom_dir = tmp_path / "custom-output"
+
+    with pytest.raises(RuntimeError, match="Output directory not found"):
+        RenderCommand(invoice_number="DE000001", output_directory=custom_dir).run(context)
+
+
+def test_render_invoice_raises_when_target_file_already_exists(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+    target = tmp_path / "output" / "DE000001.pdf"
+    target.write_bytes(b"existing content")
+
+    with pytest.raises(RuntimeError, match="File already exists"):
+        RenderCommand(invoice_number="DE000001").run(context)
+
+    assert target.read_bytes() == b"existing content"
+
+
+def test_render_invoice_replaces_existing_file_when_replace_is_set(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+    target = tmp_path / "output" / "DE000001.pdf"
+    target.write_bytes(b"existing content")
+
+    RenderCommand(invoice_number="DE000001", replace=True).run(context)
+
+    assert target.read_bytes().startswith(b"%PDF-")

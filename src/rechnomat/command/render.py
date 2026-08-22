@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from rechnomat import ui
 from rechnomat.invoice_numbering import find_highest_invoice_number
 from rechnomat.invoice_pdf import embed_invoice_xml, render_invoice_pdf
@@ -7,9 +9,17 @@ from rechnomat.yaml_io import load_model
 
 
 class RenderCommand:
-    def __init__(self, *, invoice_number: str | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        invoice_number: str | None = None,
+        output_directory: Path | None = None,
+        replace: bool = False,
+    ) -> None:
         super().__init__()
         self.invoice_number = invoice_number
+        self.output_directory = output_directory
+        self.replace = replace
 
     def run(self, context: Context) -> None:
         invoices_dir = context.paths.invoices_dir
@@ -43,11 +53,14 @@ class RenderCommand:
             if not background_path.exists():
                 raise RuntimeError(f"Background file not found: {background_path}")
 
-        output_dir = context.paths.output_dir
+        output_dir = self.output_directory or context.paths.output_dir
         if not output_dir.exists():
             raise RuntimeError(f"Output directory not found: {output_dir}")
 
         target_file = output_dir / f"{invoice_number}.pdf"
+        if target_file.exists() and not self.replace:
+            raise RuntimeError(f"File already exists: {target_file}")
+
         render_invoice_pdf(
             invoice=invoice,
             invoice_number=invoice_number,

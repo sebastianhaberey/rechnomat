@@ -2,8 +2,8 @@ name: "Meier GmbH & Co KG"  # customer's legal/company name (EN 16931 BT-44)
 legal_form: ""  # e.g. "GmbH"; leave empty if already part of name
 address:
   address_line_1: "Beispielweg 5"  # street and house number (EN 16931 BT-35/BT-50)
-  address_line_2: ""  # e.g. c/o, building, floor (EN 16931 BT-36/BT-51)
-  address_line_3: ""  # additional address line (EN 16931 BT-162/BT-163)
+  address_line_2: "c/o Müller"  # e.g. c/o, building, floor (EN 16931 BT-36/BT-51)
+  address_line_3: "Hinterhaus, EG"  # additional address line (EN 16931 BT-162/BT-163)
   postcode: "80331"  # postal code (EN 16931 BT-38/BT-53)
   city: "München"  # city (EN 16931 BT-37/BT-52)
   country_code: "DE"  # (ISO 3166-1 alpha-2) (EN 16931 BT-40/BT-55)

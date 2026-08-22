@@ -107,13 +107,26 @@ def add_invoice(obj, customer_name):
     required=False,
     help="Invoice number to render (defaults to the highest-numbered invoice in invoices/)",
 )
+@option(
+    "-o",
+    "--output-directory",
+    type=cloup.Path(path_type=Path),
+    default=None,
+    help="Directory to write the rendered PDF to (defaults to output/)",
+)
+@option(
+    "-r",
+    "--replace",
+    is_flag=True,
+    help="Replace the output file if it already exists",
+)
 @help_option(help="Show this message")
 @pass_obj
-def render_invoice(obj, invoice_number):
+def render_invoice(obj, invoice_number, output_directory, replace):
     """
     Render an invoice as a PDF
     """
-    command = RenderCommand(invoice_number=invoice_number)
+    command = RenderCommand(invoice_number=invoice_number, output_directory=output_directory, replace=replace)
     command.run(obj["context"])
 
 
