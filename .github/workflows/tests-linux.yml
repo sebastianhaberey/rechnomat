@@ -35,6 +35,9 @@ jobs:
             linux-pip-${{ matrix.python-version }}-
             linux-pip-
 
+      - name: Install Pango (required by WeasyPrint)
+        run: sudo apt install libpango-1.0-0 libpangoft2-1.0-0
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
