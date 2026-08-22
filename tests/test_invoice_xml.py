@@ -37,11 +37,25 @@ def test_build_invoice_xml_maps_seller_and_buyer_fields():
     assert vat_id == SELLER.vat_id
     seller_email = _xpath(seller_party, "ram:URIUniversalCommunication/ram:URIID[@schemeID='EM']/text()")[0]
     assert seller_email == SELLER.invoice_email
+    seller_contact = _xpath(seller_party, "ram:DefinedTradeContact")[0]
+    assert _xpath(seller_contact, "ram:PersonName/text()")[0] == SELLER.contact.name
+    assert (
+        _xpath(seller_contact, "ram:TelephoneUniversalCommunication/ram:CompleteNumber/text()")[0]
+        == SELLER.contact.phone
+    )
+    assert _xpath(seller_contact, "ram:EmailURIUniversalCommunication/ram:URIID/text()")[0] == SELLER.contact.email
 
     buyer_party = _xpath(root, "//ram:BuyerTradeParty")[0]
     assert _xpath(buyer_party, "ram:Name/text()")[0] == CUSTOMER.name
     buyer_email = _xpath(buyer_party, "ram:URIUniversalCommunication/ram:URIID[@schemeID='EM']/text()")[0]
     assert buyer_email == CUSTOMER.invoice_email
+    buyer_contact = _xpath(buyer_party, "ram:DefinedTradeContact")[0]
+    assert _xpath(buyer_contact, "ram:PersonName/text()")[0] == CUSTOMER.contact.name
+    assert (
+        _xpath(buyer_contact, "ram:TelephoneUniversalCommunication/ram:CompleteNumber/text()")[0]
+        == CUSTOMER.contact.phone
+    )
+    assert _xpath(buyer_contact, "ram:EmailURIUniversalCommunication/ram:URIID/text()")[0] == CUSTOMER.contact.email
 
 
 def test_build_invoice_xml_maps_line_items_and_tax_breakdown():

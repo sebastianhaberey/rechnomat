@@ -6,7 +6,7 @@ from drafthorse.models.payment import PaymentMeans, PaymentTerms
 from drafthorse.models.tradelines import LineItem as XmlLineItem
 
 from rechnomat.invoice_calc import InvoiceTotals, LineItemAmount, VatGroup, compute_totals
-from rechnomat.model import Address, Customer, Invoice, Seller
+from rechnomat.model import Address, Contact, Customer, Invoice, Seller
 
 _GUIDELINE_PARAMETER_ID = "urn:cen.eu:en16931:2017"
 _INVOICE_TYPE_CODE = "380"
@@ -59,6 +59,7 @@ def _apply_seller(doc: Document, seller: Seller) -> None:
     party = doc.trade.agreement.seller
     party.name = seller.name
     _apply_address(party, seller.address)
+    _apply_contact(party, seller.contact)
     party.electronic_address.uri_ID = (_EMAIL_SCHEME_ID, seller.invoice_email)
     if seller.trade_register:
         party.legal_organization.id = seller.trade_register
@@ -72,9 +73,16 @@ def _apply_buyer(doc: Document, customer: Customer) -> None:
     party = doc.trade.agreement.buyer
     party.name = customer.name
     _apply_address(party, customer.address)
+    _apply_contact(party, customer.contact)
     party.electronic_address.uri_ID = (_EMAIL_SCHEME_ID, customer.invoice_email)
     if customer.vat_id:
         _add_tax_registration(party, _VAT_SCHEME_ID, customer.vat_id)
+
+
+def _apply_contact(party: TradeParty, contact: Contact) -> None:
+    party.contact.person_name = contact.name
+    party.contact.telephone.number = contact.phone
+    party.contact.email.address = contact.email
 
 
 def _apply_address(party: TradeParty, address: Address) -> None:
