@@ -1,4 +1,5 @@
 import re
+from datetime import date
 from pathlib import Path
 
 import yaml
@@ -15,6 +16,7 @@ from rechnomat.model import Context
 EXAMPLE_INVOICES_DIR = RESOURCES_DIR / "invoices"
 
 _CUSTOMER_FIELD_PATTERN = re.compile(r'^(customer:\s*)"[^"]*"', re.MULTILINE)
+_ISSUE_DATE_FIELD_PATTERN = re.compile(r"^(issue_date:\s*)\S+", re.MULTILINE)
 
 
 class AddCommand:
@@ -63,6 +65,7 @@ class AddCommand:
         content = source_file.read_text(encoding="utf-8")
         if rewrite_customer:
             content = self._with_customer(content)
+        content = self._with_issue_date(content)
 
         target_file.parent.mkdir(parents=True, exist_ok=True)
         target_file.write_text(content, encoding="utf-8")
@@ -77,4 +80,10 @@ class AddCommand:
         new_content, count = _CUSTOMER_FIELD_PATTERN.subn(rf'\1"{self.customer_name}"', content, count=1)
         if count == 0:
             raise RuntimeError("Source invoice file has no 'customer' field to replace")
+        return new_content
+
+    def _with_issue_date(self, content: str) -> str:
+        new_content, count = _ISSUE_DATE_FIELD_PATTERN.subn(rf"\g<1>{date.today().isoformat()}", content, count=1)
+        if count == 0:
+            raise RuntimeError("Source invoice file has no 'issue_date' field to replace")
         return new_content

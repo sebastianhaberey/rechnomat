@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,10 @@ def _setup_project(context: Context) -> None:
 
 def _invoice_customer(path: Path) -> str:
     return yaml.safe_load(path.read_text(encoding="utf-8"))["customer"]
+
+
+def _invoice_issue_date(path: Path):
+    return yaml.safe_load(path.read_text(encoding="utf-8"))["issue_date"]
 
 
 def test_add_invoice_copies_bundled_example_when_no_invoices_exist(tmp_path, monkeypatch, context):
@@ -96,6 +101,37 @@ def test_add_invoice_without_customer_name_copies_highest_invoice_overall(tmp_pa
     assert target.exists()
     # customer is left as-is, since none was specified to switch to
     assert _invoice_customer(target) == "meier-gmbh"
+
+
+def test_add_invoice_uses_current_date_instead_of_copied_one(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+    original = tmp_path / "invoices" / "DE000001.yml"
+    original.write_text(
+        original.read_text(encoding="utf-8").replace("issue_date: 2026-08-15", "issue_date: 2000-01-01"),
+        encoding="utf-8",
+    )
+
+    AddCommand(customer_name="meier-gmbh").run(context)
+
+    target = tmp_path / "invoices" / "DE000002.yml"
+    assert _invoice_issue_date(target) == date.today()
+    # original invoice must be untouched
+    assert _invoice_issue_date(original) == date(2000, 1, 1)
+
+
+def test_add_invoice_raises_when_source_has_no_issue_date_field(tmp_path, monkeypatch, context):
+    monkeypatch.chdir(tmp_path)
+    _setup_project(context)
+    original = tmp_path / "invoices" / "DE000001.yml"
+    issue_date_line = "issue_date: 2026-08-15  # invoice issue date (EN 16931 BT-2)\n"
+    original.write_text(
+        original.read_text(encoding="utf-8").replace(issue_date_line, ""),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RuntimeError, match="has no 'issue_date' field"):
+        AddCommand(customer_name="meier-gmbh").run(context)
 
 
 def test_add_invoice_without_customer_name_copies_bundled_example_when_no_invoices_exist(
