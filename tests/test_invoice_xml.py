@@ -32,7 +32,7 @@ def test_build_invoice_xml_maps_seller_and_buyer_fields():
 
     seller_party = _xpath(root, "//ram:SellerTradeParty")[0]
     assert _xpath(seller_party, "ram:Name/text()")[0] == SELLER.name
-    assert _xpath(seller_party, "ram:PostalTradeAddress/ram:LineOne/text()")[0] == SELLER.address.street
+    assert _xpath(seller_party, "ram:PostalTradeAddress/ram:LineOne/text()")[0] == SELLER.address.address_line_1
     vat_id = _xpath(seller_party, "ram:SpecifiedTaxRegistration/ram:ID[@schemeID='VA']/text()")[0]
     assert vat_id == SELLER.vat_id
     seller_email = _xpath(seller_party, "ram:URIUniversalCommunication/ram:URIID[@schemeID='EM']/text()")[0]
@@ -56,6 +56,35 @@ def test_build_invoice_xml_maps_seller_and_buyer_fields():
         == CUSTOMER.contact.phone
     )
     assert _xpath(buyer_contact, "ram:EmailURIUniversalCommunication/ram:URIID/text()")[0] == CUSTOMER.contact.email
+
+
+def test_build_invoice_xml_maps_optional_address_lines_when_set():
+    seller = SELLER.model_copy(
+        update={
+            "address": SELLER.address.model_copy(
+                update={"address_line_2": "c/o Reception", "address_line_3": "3rd Floor"}
+            )
+        }
+    )
+    invoice = Invoice.model_validate(BASE_INVOICE)
+
+    xml_bytes = build_invoice_xml(invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=seller)
+    root = etree.fromstring(xml_bytes)
+
+    seller_party = _xpath(root, "//ram:SellerTradeParty")[0]
+    assert _xpath(seller_party, "ram:PostalTradeAddress/ram:LineTwo/text()")[0] == "c/o Reception"
+    assert _xpath(seller_party, "ram:PostalTradeAddress/ram:LineThree/text()")[0] == "3rd Floor"
+
+
+def test_build_invoice_xml_omits_optional_address_lines_when_unset():
+    invoice = Invoice.model_validate(BASE_INVOICE)
+
+    xml_bytes = build_invoice_xml(invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER)
+    root = etree.fromstring(xml_bytes)
+
+    seller_party = _xpath(root, "//ram:SellerTradeParty")[0]
+    assert _xpath(seller_party, "ram:PostalTradeAddress/ram:LineTwo/text()") == []
+    assert _xpath(seller_party, "ram:PostalTradeAddress/ram:LineThree/text()") == []
 
 
 def test_build_invoice_xml_maps_line_items_and_tax_breakdown():

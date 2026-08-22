@@ -76,7 +76,9 @@ class Config:
 
 
 class Address(BaseModel):
-    street: str = Field(description="street and house number (EN 16931 BT-35/BT-50)")
+    address_line_1: str = Field(description="street and house number (EN 16931 BT-35/BT-50)")
+    address_line_2: str | None = Field(default=None, description="e.g. c/o, building, floor (EN 16931 BT-36/BT-51)")
+    address_line_3: str | None = Field(default=None, description="additional address line (EN 16931 BT-162/BT-163)")
     postcode: str = Field(description="postal code (EN 16931 BT-38/BT-53)")
     city: str = Field(description="city (EN 16931 BT-37/BT-52)")
     country_code: str = Field(pattern=r"^[A-Z]{2}$", description="ISO 3166-1 alpha-2 (EN 16931 BT-40/BT-55)")

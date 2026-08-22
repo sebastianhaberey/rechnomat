@@ -87,7 +87,11 @@ def _apply_contact(party: TradeParty, contact: Contact) -> None:
 
 def _apply_address(party: TradeParty, address: Address) -> None:
     postal_address: PostalTradeAddress = party.address
-    postal_address.line_one = address.street
+    postal_address.line_one = address.address_line_1
+    if address.address_line_2:
+        postal_address.line_two = address.address_line_2
+    if address.address_line_3:
+        postal_address.line_three = address.address_line_3
     postal_address.postcode = address.postcode
     postal_address.city_name = address.city
     postal_address.country_id = address.country_code

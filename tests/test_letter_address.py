@@ -3,14 +3,14 @@ from rechnomat.model import Customer, Seller
 
 CUSTOMER = {
     "name": "ACME GmbH",
-    "address": {"street": "Musterstrasse 12", "postcode": "10115", "city": "Berlin", "country_code": "DE"},
+    "address": {"address_line_1": "Musterstrasse 12", "postcode": "10115", "city": "Berlin", "country_code": "DE"},
     "contact": {"name": "Maria Mustermann", "email": "maria@acme.example", "phone": "+49 30 1234567"},
     "invoice_email": "buchhaltung@acme.example",
 }
 
 SELLER = {
     "name": "Musterfirma Max Mustermann",
-    "address": {"street": "Beispielweg 5", "postcode": "80331", "city": "Muenchen", "country_code": "DE"},
+    "address": {"address_line_1": "Beispielweg 5", "postcode": "80331", "city": "Muenchen", "country_code": "DE"},
     "vat_id": "DE987654321",
     "contact": {"name": "Max Mustermann", "email": "max@musterfirma.example", "phone": "+49 89 1234567"},
     "invoice_email": "rechnungen@musterfirma.example",
@@ -43,6 +43,22 @@ def test_build_address_lines_adds_country_for_non_domestic_address():
 def test_build_address_lines_omits_country_line_for_domestic_address():
     customer = Customer.model_validate(CUSTOMER)
     assert "DE" not in build_address_lines(customer)
+
+
+def test_build_address_lines_includes_line_two_and_three_when_set():
+    customer = Customer.model_validate(
+        {
+            **CUSTOMER,
+            "address": {**CUSTOMER["address"], "address_line_2": "c/o Reception", "address_line_3": "3rd Floor"},
+        }
+    )
+    assert build_address_lines(customer) == [
+        "ACME GmbH",
+        "Musterstrasse 12",
+        "c/o Reception",
+        "3rd Floor",
+        "10115 Berlin",
+    ]
 
 
 def test_build_return_address_line():

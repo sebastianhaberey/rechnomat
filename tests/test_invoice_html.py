@@ -8,7 +8,7 @@ TEMPLATE_DIR = importlib.resources.files("rechnomat") / "resources" / "templates
 CUSTOMER = Customer.model_validate(
     {
         "name": "ACME GmbH",
-        "address": {"street": "Musterstrasse 12", "postcode": "10115", "city": "Berlin", "country_code": "DE"},
+        "address": {"address_line_1": "Musterstrasse 12", "postcode": "10115", "city": "Berlin", "country_code": "DE"},
         "contact": {"name": "Maria Mustermann", "email": "maria@acme.example", "phone": "+49 30 1234567"},
         "invoice_email": "buchhaltung@acme.example",
     }
@@ -17,7 +17,7 @@ CUSTOMER = Customer.model_validate(
 SELLER = Seller.model_validate(
     {
         "name": "Musterfirma Max Mustermann",
-        "address": {"street": "Beispielweg 5", "postcode": "80331", "city": "Muenchen", "country_code": "DE"},
+        "address": {"address_line_1": "Beispielweg 5", "postcode": "80331", "city": "Muenchen", "country_code": "DE"},
         "vat_id": "DE987654321",
         "contact": {"name": "Max Mustermann", "email": "max@musterfirma.example", "phone": "+49 89 1234567"},
         "invoice_email": "rechnungen@musterfirma.example",
@@ -72,7 +72,12 @@ def test_render_invoice_html_includes_country_line_for_non_domestic_customer():
     customer = Customer.model_validate(
         {
             "name": "Acme AG",
-            "address": {"street": "Bahnhofstrasse 1", "postcode": "8001", "city": "Zuerich", "country_code": "CH"},
+            "address": {
+                "address_line_1": "Bahnhofstrasse 1",
+                "postcode": "8001",
+                "city": "Zuerich",
+                "country_code": "CH",
+            },
             "contact": {"name": "Peter Muster", "email": "peter@acme.example", "phone": "+41 44 1234567"},
             "invoice_email": "buchhaltung@acme.example",
         }

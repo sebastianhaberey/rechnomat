@@ -9,7 +9,7 @@ from rechnomat.model import Address, Customer, Invoice, Layout, Seller
 VALID_CUSTOMER = {
     "name": "ACME GmbH",
     "address": {
-        "street": "Musterstraße 12",
+        "address_line_1": "Musterstraße 12",
         "postcode": "10115",
         "city": "Berlin",
         "country_code": "DE",
@@ -26,7 +26,7 @@ VALID_CUSTOMER = {
 VALID_SELLER = {
     "name": "Musterfirma Max Mustermann",
     "address": {
-        "street": "Beispielweg 5",
+        "address_line_1": "Beispielweg 5",
         "postcode": "80331",
         "city": "München",
         "country_code": "DE",

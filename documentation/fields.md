@@ -5,7 +5,7 @@ in the ZUGFeRD/Factur-X CII XML, and where each value comes from.
 "Source" names where the value comes from: the invoice, seller, or customer YAML input (see
 `run/invoices/`, `run/seller/seller.yml`, `run/customers/`), a hardcoded `Constant`, or a
 `Derived` value computed by the app. "Field/Value" gives the specific YAML key (nested fields use
-dotted paths, e.g. `address.street`), the constant's value, or a short explanation of how a
+dotted paths, e.g. `address.address_line_1`), the constant's value, or a short explanation of how a
 derived value is computed.
 
 Only the EN16931 profile, standard-rate VAT (category "S") is supported - see
@@ -34,7 +34,9 @@ Only the EN16931 profile, standard-rate VAT (category "S") is supported - see
 | BT-31  | Seller VAT identifier                    | Seller YAML  | `vat_id`, when set (EAS scheme `VA`) |
 | BT-32  | Seller tax registration identifier       | Seller YAML  | `tax_number`, when set (scheme `FC`, German Steuernummer) |
 | BT-34  | Seller electronic address                | Seller YAML  | `invoice_email` (scheme `EM`)       |
-| BT-35  | Seller address line one                  | Seller YAML  | `address.street`                    |
+| BT-35  | Seller address line one                  | Seller YAML  | `address.address_line_1`            |
+| BT-36  | Seller address line two                  | Seller YAML  | `address.address_line_2`, when set  |
+| BT-162 | Seller address line three                | Seller YAML  | `address.address_line_3`, when set  |
 | BT-37  | Seller city                              | Seller YAML  | `address.city`                      |
 | BT-38  | Seller post code                         | Seller YAML  | `address.postcode`                  |
 | BT-40  | Seller country code                      | Seller YAML  | `address.country_code`              |
@@ -49,7 +51,9 @@ BR-CO-26), enforced by a model validator.
 | BT-44  | Buyer name                           | Customer YAML  | `name`                                  |
 | BT-48  | Buyer VAT identifier                 | Customer YAML  | `vat_id`, when set (scheme `VA`)         |
 | BT-49  | Buyer electronic address             | Customer YAML  | `invoice_email` (scheme `EM`)            |
-| BT-50  | Buyer address line one               | Customer YAML  | `address.street`                         |
+| BT-50  | Buyer address line one               | Customer YAML  | `address.address_line_1`                 |
+| BT-51  | Buyer address line two               | Customer YAML  | `address.address_line_2`, when set       |
+| BT-163 | Buyer address line three             | Customer YAML  | `address.address_line_3`, when set       |
 | BT-52  | Buyer city                           | Customer YAML  | `address.city`                           |
 | BT-53  | Buyer post code                      | Customer YAML  | `address.postcode`                       |
 | BT-55  | Buyer country code                   | Customer YAML  | `address.country_code`                   |
