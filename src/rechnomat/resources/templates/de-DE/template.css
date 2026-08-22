@@ -38,9 +38,9 @@ body {
 
 .address-field {
     position: absolute;
-    left: 20mm;
-    top: 45mm;
-    width: 85mm;
+    left: 25mm;
+    top: 48mm;
+    width: 80mm;
 }
 
 .return-address-text {
