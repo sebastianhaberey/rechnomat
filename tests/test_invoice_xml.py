@@ -36,12 +36,12 @@ def test_build_invoice_xml_maps_seller_and_buyer_fields():
     vat_id = _xpath(seller_party, "ram:SpecifiedTaxRegistration/ram:ID[@schemeID='VA']/text()")[0]
     assert vat_id == SELLER.vat_id
     seller_email = _xpath(seller_party, "ram:URIUniversalCommunication/ram:URIID[@schemeID='EM']/text()")[0]
-    assert seller_email == SELLER.contact.email
+    assert seller_email == SELLER.invoice_email
 
     buyer_party = _xpath(root, "//ram:BuyerTradeParty")[0]
     assert _xpath(buyer_party, "ram:Name/text()")[0] == CUSTOMER.name
     buyer_email = _xpath(buyer_party, "ram:URIUniversalCommunication/ram:URIID[@schemeID='EM']/text()")[0]
-    assert buyer_email == CUSTOMER.contact.email
+    assert buyer_email == CUSTOMER.invoice_email
 
 
 def test_build_invoice_xml_maps_line_items_and_tax_breakdown():

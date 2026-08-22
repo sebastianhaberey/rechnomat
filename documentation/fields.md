@@ -33,7 +33,7 @@ Only the EN16931 profile, standard-rate VAT (category "S") is supported - see
 | BT-30  | Seller legal registration identifier     | Seller YAML  | `trade_register`, when set          |
 | BT-31  | Seller VAT identifier                    | Seller YAML  | `vat_id`, when set (EAS scheme `VA`) |
 | BT-32  | Seller tax registration identifier       | Seller YAML  | `tax_number`, when set (scheme `FC`, German Steuernummer) |
-| BT-34  | Seller electronic address                | Seller YAML  | `contact.email` (scheme `EM`)       |
+| BT-34  | Seller electronic address                | Seller YAML  | `invoice_email` (scheme `EM`)       |
 | BT-35  | Seller address line one                  | Seller YAML  | `address.street`                    |
 | BT-37  | Seller city                              | Seller YAML  | `address.city`                      |
 | BT-38  | Seller post code                         | Seller YAML  | `address.postcode`                  |
@@ -48,7 +48,7 @@ BR-CO-26), enforced by a model validator.
 |--------|--------------------------------------|----------------|-----------------------------------------|
 | BT-44  | Buyer name                           | Customer YAML  | `name`                                  |
 | BT-48  | Buyer VAT identifier                 | Customer YAML  | `vat_id`, when set (scheme `VA`)         |
-| BT-49  | Buyer electronic address             | Customer YAML  | `contact.email` (scheme `EM`)            |
+| BT-49  | Buyer electronic address             | Customer YAML  | `invoice_email` (scheme `EM`)            |
 | BT-50  | Buyer address line one               | Customer YAML  | `address.street`                         |
 | BT-52  | Buyer city                           | Customer YAML  | `address.city`                           |
 | BT-53  | Buyer post code                      | Customer YAML  | `address.postcode`                       |
@@ -101,8 +101,11 @@ BR-CO-26), enforced by a model validator.
   exempt, reverse-charge, and other special VAT categories (which need an explicit category code
   and a legal exemption reason, EN 16931 BG-23) are not supported. `vat_rate` must be positive in
   every line item - enforced by a model validator.
-- **Electronic address reuses the contact email.** BT-34/BT-49 use `contact.email` with EAS scheme
-  `EM` rather than a dedicated e-invoice routing address (e.g. a Peppol participant ID).
+- **Electronic address is always an email, not a Peppol ID.** BT-34/BT-49 are populated from
+  `invoice_email` (seller/customer YAML) with EAS scheme `EM`, rather than a dedicated e-invoice
+  routing address (e.g. a Peppol participant ID). `invoice_email` is kept separate from
+  `contact.email` since the address invoices are sent to/from (e.g. an accounts-payable or
+  `rechnungen@` mailbox) is often different from the named contact's own email.
 - <a id="br-co-25-payment-terms-fallback"></a>**BR-CO-25 payment-terms fallback.** EN 16931 requires
   either a due date (BT-9) or a payment-terms description (BT-20) whenever an amount is due. Since
   the invoice YAML has no dedicated free-text payment-terms field, the app always derives one:

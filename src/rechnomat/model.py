@@ -91,6 +91,9 @@ class Customer(BaseModel):
     address: Address
     vat_id: str | None = Field(default=None, description="Ust-IdNr. (EN 16931 BT-48)")
     contact: Contact
+    invoice_email: str = Field(
+        description="invoice recipient address, e.g. an accounts-payable mailbox (EN 16931 BT-49)"
+    )
 
 
 class BankDetails(BaseModel):
@@ -110,6 +113,7 @@ class Seller(BaseModel):
         default=None, description='e.g. "Amtsgericht München, HRB 123456" (EN 16931 BT-30)'
     )
     contact: Contact
+    invoice_email: str = Field(description="dedicated invoicing address, e.g. rechnungen@company.de (EN 16931 BT-34)")
     bank_details: BankDetails
 
     @model_validator(mode="after")

@@ -59,7 +59,7 @@ def _apply_seller(doc: Document, seller: Seller) -> None:
     party = doc.trade.agreement.seller
     party.name = seller.name
     _apply_address(party, seller.address)
-    party.electronic_address.uri_ID = (_EMAIL_SCHEME_ID, seller.contact.email)
+    party.electronic_address.uri_ID = (_EMAIL_SCHEME_ID, seller.invoice_email)
     if seller.trade_register:
         party.legal_organization.id = seller.trade_register
     if seller.vat_id:
@@ -72,7 +72,7 @@ def _apply_buyer(doc: Document, customer: Customer) -> None:
     party = doc.trade.agreement.buyer
     party.name = customer.name
     _apply_address(party, customer.address)
-    party.electronic_address.uri_ID = (_EMAIL_SCHEME_ID, customer.contact.email)
+    party.electronic_address.uri_ID = (_EMAIL_SCHEME_ID, customer.invoice_email)
     if customer.vat_id:
         _add_tax_registration(party, _VAT_SCHEME_ID, customer.vat_id)
 

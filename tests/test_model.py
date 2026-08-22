@@ -20,6 +20,7 @@ VALID_CUSTOMER = {
         "email": "maria.mustermann@acme-gmbh.example",
         "phone": "+49 30 1234567",
     },
+    "invoice_email": "buchhaltung@acme-gmbh.example",
 }
 
 VALID_SELLER = {
@@ -36,6 +37,7 @@ VALID_SELLER = {
         "email": "max.mustermann@musterfirma.example",
         "phone": "+49 89 1234567",
     },
+    "invoice_email": "rechnungen@musterfirma.example",
     "bank_details": {
         "account_owner": "Musterfirma Max Mustermann",
         "iban": "DE02120300000000202051",

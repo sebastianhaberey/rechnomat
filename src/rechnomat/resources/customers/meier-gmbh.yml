@@ -10,3 +10,4 @@ contact:
   name: "Peter Meier"  # contact person at the customer (EN 16931 BT-41/BT-56)
   email: "peter.meier@meier-gmbh.de"  # contact email address (EN 16931 BT-43/BT-58)
   phone: "+49 89 1234567"  # contact phone number (EN 16931 BT-42/BT-57)
+invoice_email: "buchhaltung@meier-gmbh.de"  # invoice recipient address (EN 16931 BT-49)

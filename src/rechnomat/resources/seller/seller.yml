@@ -12,6 +12,7 @@ contact:
   name: "Harald Kaiser"  # contact person at the seller (EN 16931 BT-41/BT-56)
   email: "harald.kaiser@musterhaus-solutions.de"  # contact email address (EN 16931 BT-43/BT-58)
   phone: "+49 30 1234567"  # contact phone number (EN 16931 BT-42/BT-57)
+invoice_email: "rechnungen@musterhaus-solutions.de"  # dedicated invoicing address (EN 16931 BT-34)
 bank_details:
   account_owner: "Musterhaus EDV Solutions GmbH"  # name on the bank account (EN 16931 BT-85)
   iban: "DE02120300000000202051"  # IBAN (EN 16931 BT-84)

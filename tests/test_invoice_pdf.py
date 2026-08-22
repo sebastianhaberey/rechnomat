@@ -24,6 +24,7 @@ CUSTOMER = Customer.model_validate(
         "name": "ACME GmbH",
         "address": {"street": "Musterstrasse 12", "postcode": "10115", "city": "Berlin", "country_code": "DE"},
         "contact": {"name": "Maria Mustermann", "email": "maria@acme.example", "phone": "+49 30 1234567"},
+        "invoice_email": "buchhaltung@acme.example",
     }
 )
 
@@ -33,6 +34,7 @@ SELLER = Seller.model_validate(
         "address": {"street": "Beispielweg 5", "postcode": "80331", "city": "Muenchen", "country_code": "DE"},
         "vat_id": "DE987654321",
         "contact": {"name": "Max Mustermann", "email": "max@musterfirma.example", "phone": "+49 89 1234567"},
+        "invoice_email": "rechnungen@musterfirma.example",
         "bank_details": {
             "account_owner": "Musterfirma Max Mustermann",
             "iban": "DE02120300000000202051",
@@ -108,6 +110,7 @@ def test_render_invoice_pdf_handles_non_domestic_customer_address(tmp_path):
             "name": "Acme AG",
             "address": {"street": "Bahnhofstrasse 1", "postcode": "8001", "city": "Zuerich", "country_code": "CH"},
             "contact": {"name": "Peter Muster", "email": "peter@acme.example", "phone": "+41 44 1234567"},
+            "invoice_email": "buchhaltung@acme.example",
         }
     )
     output_path = tmp_path / "invoice.pdf"
