@@ -115,7 +115,7 @@ def test_invoice_due_date_is_computed_across_year_boundary():
 def test_invoice_layout_defaults_to_de_template_with_everything_rendered():
     invoice = Invoice.model_validate(VALID_INVOICE)
     assert invoice.layout == Layout(
-        template="de",
+        template="de-DE",
         render_bank_details=True,
         render_notes=True,
         render_return_address_line=True,

@@ -1,6 +1,6 @@
 customer: "meier-gmbh"  # references a Customer file by its filename stem
 layout: # invoice rendering options
-  template: "de"  # selects the template directory under templates/
+  template: "de-DE"  # selects the template directory under templates/
   render_bank_details: true  # show the seller's bank details on the invoice
   render_notes: true  # show the notes field on the invoice
   render_return_address_line: true  # show the small return-address line above the recipient address, for window envelopes

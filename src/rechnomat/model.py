@@ -146,7 +146,7 @@ class LineItem(BaseModel):
 
 
 class Layout(BaseModel):
-    template: str = Field(default="de", description="selects the template directory under templates/, e.g. 'de'")
+    template: str = Field(default="de-DE", description="selects the template directory under templates/, e.g. 'de-DE'")
     render_bank_details: bool = Field(default=True, description="show the seller's bank details on the invoice")
     render_notes: bool = Field(default=True, description="show the notes field on the invoice")
     render_return_address_line: bool = Field(

@@ -16,7 +16,7 @@ _CII_NS = {
     "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
 }
 
-TEMPLATE_DIR = importlib.resources.files("rechnomat") / "resources" / "templates" / "de"
+TEMPLATE_DIR = importlib.resources.files("rechnomat") / "resources" / "templates" / "de-DE"
 BACKGROUND_PATH = importlib.resources.files("rechnomat") / "resources" / "backgrounds" / "letterhead.pdf"
 
 CUSTOMER = Customer.model_validate(

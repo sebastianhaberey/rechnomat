@@ -34,7 +34,7 @@ Ground rules for working in this repository.
 
 ## Verifying Layout/Template Changes
 
-Passing tests do not confirm a layout looks right - changes to `src/rechnomat/resources/templates/de/` (HTML/CSS)
+Passing tests do not confirm a layout looks right - changes to `src/rechnomat/resources/templates/de-DE/` (HTML/CSS)
 must be checked visually before considering the change done:
 
 1. Render a sample invoice PDF with `render_invoice_pdf` (see `tests/test_invoice_pdf.py` for ready-made
