@@ -70,7 +70,6 @@ def warn(msg: str, secondary: str = None) -> None:
 
 
 def error(msg: str, secondary: str = None) -> None:
-    newline()
     if secondary:
         console.print(msg, style=STYLES[StyleId.ERROR], end="")
         console.print(": ", secondary)
