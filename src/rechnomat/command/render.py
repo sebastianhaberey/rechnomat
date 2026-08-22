@@ -6,7 +6,7 @@ from rechnomat.model import Context, Customer, Invoice, Seller
 from rechnomat.yaml_io import load_model
 
 
-class RenderInvoiceCommand:
+class RenderCommand:
     def __init__(self, *, invoice_number: str | None = None) -> None:
         super().__init__()
         self.invoice_number = invoice_number

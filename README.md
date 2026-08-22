@@ -75,7 +75,7 @@ This will create subfolders for customers, invoices etc. The folders contain dem
 Render the demo invoice to folder `output` with:
 
 ```
-rechnomat render-invoice
+rechnomat render
 ```
 
 ## Disclaimer

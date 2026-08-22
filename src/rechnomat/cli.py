@@ -5,10 +5,10 @@ import cloup
 from click import help_option, pass_obj, version_option
 from cloup import HelpFormatter, HelpTheme, Section, argument, group, option, pass_context
 
-from rechnomat.command.add_invoice import AddInvoiceCommand
+from rechnomat.command.add import AddCommand
 from rechnomat.command.info import InfoCommand
 from rechnomat.command.init import InitCommand
-from rechnomat.command.render_invoice import RenderInvoiceCommand
+from rechnomat.command.render import RenderCommand
 from rechnomat.model import Context, Paths
 from rechnomat.theme import StyleId, theme
 
@@ -76,14 +76,14 @@ def cli(
 @pass_obj
 def init(obj, overwrite):
     """
-    Copy the bundled example customers, invoices, seller and templates into the current directory,
-    and create an empty output directory for rendered invoices
+    Creates all required directories in the current directory and populates them with example files.
+    Existing directories will not be touched.
     """
     command = InitCommand(overwrite=overwrite)
     command.run(obj["context"])
 
 
-@cli.command(section=SECTION_MAIN, name="add-invoice")
+@cli.command(section=SECTION_MAIN, name="add")
 @argument(
     "customer-name",
     required=False,
@@ -94,14 +94,14 @@ def init(obj, overwrite):
 @pass_obj
 def add_invoice(obj, customer_name):
     """
-    Add a new invoice, copying the customer's most recent invoice, or the most recent invoice
-    overall, or the bundled example invoice - whichever is found first
+    Add a new invoice, copying a] the customer's most recent invoice or b] the most recent invoice
+    overall or c] the bundled example invoice, whichever is found first, in that order.
     """
-    command = AddInvoiceCommand(customer_name=customer_name)
+    command = AddCommand(customer_name=customer_name)
     command.run(obj["context"])
 
 
-@cli.command(section=SECTION_MAIN, name="render-invoice")
+@cli.command(section=SECTION_MAIN, name="render")
 @argument(
     "invoice-number",
     required=False,
@@ -113,7 +113,7 @@ def render_invoice(obj, invoice_number):
     """
     Render an invoice as a PDF
     """
-    command = RenderInvoiceCommand(invoice_number=invoice_number)
+    command = RenderCommand(invoice_number=invoice_number)
     command.run(obj["context"])
 
 

@@ -5,7 +5,7 @@ import pytest
 from pypdf import PdfReader
 
 from rechnomat.command.init import InitCommand
-from rechnomat.command.render_invoice import RenderInvoiceCommand
+from rechnomat.command.render import RenderCommand
 from rechnomat.model import Context, Paths
 
 
@@ -22,7 +22,7 @@ def test_render_invoice_writes_pdf_for_explicit_number(tmp_path, monkeypatch, co
     monkeypatch.chdir(tmp_path)
     _setup_project(context)
 
-    RenderInvoiceCommand(invoice_number="DE000001").run(context)
+    RenderCommand(invoice_number="DE000001").run(context)
 
     target = tmp_path / "output" / "DE000001.pdf"
     assert target.exists()
@@ -34,7 +34,7 @@ def test_render_invoice_defaults_to_highest_invoice_number(tmp_path, monkeypatch
     _setup_project(context)
     shutil.copy(tmp_path / "invoices" / "DE000001.yml", tmp_path / "invoices" / "DE000002.yml")
 
-    RenderInvoiceCommand().run(context)
+    RenderCommand().run(context)
 
     assert (tmp_path / "output" / "DE000002.pdf").exists()
     assert not (tmp_path / "output" / "DE000001.pdf").exists()
@@ -46,7 +46,7 @@ def test_render_invoice_raises_when_no_invoices_exist(tmp_path, monkeypatch, con
     shutil.rmtree(tmp_path / "invoices")
 
     with pytest.raises(RuntimeError, match="No invoices found"):
-        RenderInvoiceCommand().run(context)
+        RenderCommand().run(context)
 
 
 def test_render_invoice_raises_for_unknown_invoice_number(tmp_path, monkeypatch, context):
@@ -54,7 +54,7 @@ def test_render_invoice_raises_for_unknown_invoice_number(tmp_path, monkeypatch,
     _setup_project(context)
 
     with pytest.raises(RuntimeError, match="Invoice file not found"):
-        RenderInvoiceCommand(invoice_number="00099999").run(context)
+        RenderCommand(invoice_number="00099999").run(context)
 
 
 def test_render_invoice_raises_when_customer_file_missing(tmp_path, monkeypatch, context):
@@ -63,7 +63,7 @@ def test_render_invoice_raises_when_customer_file_missing(tmp_path, monkeypatch,
     (tmp_path / "customers" / "meier-gmbh.yml").unlink()
 
     with pytest.raises(RuntimeError, match="Customer file not found"):
-        RenderInvoiceCommand(invoice_number="DE000001").run(context)
+        RenderCommand(invoice_number="DE000001").run(context)
 
 
 def test_render_invoice_raises_when_seller_file_missing(tmp_path, monkeypatch, context):
@@ -72,7 +72,7 @@ def test_render_invoice_raises_when_seller_file_missing(tmp_path, monkeypatch, c
     (tmp_path / "seller" / "seller.yml").unlink()
 
     with pytest.raises(RuntimeError, match="Seller file not found"):
-        RenderInvoiceCommand(invoice_number="DE000001").run(context)
+        RenderCommand(invoice_number="DE000001").run(context)
 
 
 def test_render_invoice_uses_renamed_file_as_source_of_truth_for_number(tmp_path, monkeypatch, context):
@@ -80,7 +80,7 @@ def test_render_invoice_uses_renamed_file_as_source_of_truth_for_number(tmp_path
     _setup_project(context)
     (tmp_path / "invoices" / "DE000001.yml").rename(tmp_path / "invoices" / "DE000009.yml")
 
-    RenderInvoiceCommand(invoice_number="DE000009").run(context)
+    RenderCommand(invoice_number="DE000009").run(context)
 
     assert (tmp_path / "output" / "DE000009.pdf").exists()
 
@@ -89,7 +89,7 @@ def test_render_invoice_merges_bundled_background_by_default(tmp_path, monkeypat
     monkeypatch.chdir(tmp_path)
     _setup_project(context)
 
-    RenderInvoiceCommand(invoice_number="DE000001").run(context)
+    RenderCommand(invoice_number="DE000001").run(context)
 
     background_page = PdfReader(tmp_path / "backgrounds" / "letterhead.pdf").pages[0]
     rendered_page = PdfReader(tmp_path / "output" / "DE000001.pdf").pages[0]
@@ -104,7 +104,7 @@ def test_render_invoice_raises_when_background_file_missing(tmp_path, monkeypatc
     (tmp_path / "backgrounds" / "letterhead.pdf").unlink()
 
     with pytest.raises(RuntimeError, match="Background file not found"):
-        RenderInvoiceCommand(invoice_number="DE000001").run(context)
+        RenderCommand(invoice_number="DE000001").run(context)
 
 
 def test_render_invoice_raises_when_output_directory_missing(tmp_path, monkeypatch, context):
@@ -113,4 +113,4 @@ def test_render_invoice_raises_when_output_directory_missing(tmp_path, monkeypat
     shutil.rmtree(tmp_path / "output")
 
     with pytest.raises(RuntimeError, match="Output directory not found"):
-        RenderInvoiceCommand(invoice_number="DE000001").run(context)
+        RenderCommand(invoice_number="DE000001").run(context)

@@ -17,7 +17,7 @@ EXAMPLE_INVOICES_DIR = RESOURCES_DIR / "invoices"
 _CUSTOMER_FIELD_PATTERN = re.compile(r'^(customer:\s*)"[^"]*"', re.MULTILINE)
 
 
-class AddInvoiceCommand:
+class AddCommand:
     def __init__(self, *, customer_name: str | None = None) -> None:
         super().__init__()
         self.customer_name = customer_name
