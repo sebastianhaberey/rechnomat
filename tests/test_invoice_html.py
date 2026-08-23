@@ -150,6 +150,33 @@ def test_render_invoice_html_formats_line_items_and_totals():
     assert "1.163,80 €" in html
 
 
+def test_render_invoice_html_renders_exempt_line_as_steuerfrei():
+    invoice = Invoice.model_validate(
+        {
+            **BASE_INVOICE,
+            "notes": "Umsatzsteuerfrei gem. § 3a Abs. 2 UStG, Umkehrung der Steuerschuld",
+            "line_items": [
+                *BASE_INVOICE["line_items"],
+                {
+                    "description": "Consulting UK",
+                    "quantity": "1",
+                    "unit": "EA",
+                    "unit_price_net": "50.00",
+                    "vat_rate": "0",
+                    "vat_category_code": "AE",
+                },
+            ],
+        }
+    )
+
+    html = render_invoice_html(
+        invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER, template_dir=TEMPLATE_DIR
+    )
+
+    assert "zzgl. 19 % USt. auf 960,00 €" in html
+    assert "steuerfrei auf 50,00 €" in html
+
+
 def test_render_invoice_html_omits_notes_block_when_absent():
     invoice = Invoice.model_validate(BASE_INVOICE)
 

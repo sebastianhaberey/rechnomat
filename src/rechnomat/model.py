@@ -2,8 +2,12 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field, computed_field, model_validator
+
+VatCategoryCode = Literal["S", "AE", "E", "G", "O"]
+STANDARD_VAT_CATEGORY_CODE: VatCategoryCode = "S"
 
 
 @dataclass(frozen=True, slots=True)
@@ -135,13 +139,22 @@ class LineItem(BaseModel):
     unit: str = Field(description='UN/ECE Recommendation 20 unit code, e.g. "HUR", "EA" (EN 16931 BT-130)')
     unit_price_net: Decimal = Field(description="net unit price (EN 16931 BT-146)")
     vat_rate: Decimal = Field(description="percent (EN 16931 BT-152)")
+    vat_category_code: VatCategoryCode = Field(
+        default=STANDARD_VAT_CATEGORY_CODE,
+        description=(
+            'VAT category (EN 16931 BT-151): "S" standard rate, "AE" reverse charge '
+            '(e.g. B2B service to a foreign customer under §3a Abs. 2 UStG), "E" exempt, '
+            '"G" export outside the EU, "O" not subject to VAT'
+        ),
+    )
 
     @model_validator(mode="after")
-    def _check_standard_vat_rate(self) -> LineItem:
-        # only standard-rate VAT (category "S") is supported; zero/exempt/reverse-charge rates
-        # need a legal exemption reason and category code we don't yet model (EN 16931 BG-23)
-        if self.vat_rate <= 0:
-            raise ValueError("vat_rate must be positive; zero/exempt VAT rates are not supported")
+    def _check_vat_rate_matches_category(self) -> LineItem:
+        if self.vat_category_code == STANDARD_VAT_CATEGORY_CODE:
+            if self.vat_rate <= 0:
+                raise ValueError("vat_rate must be positive; zero/exempt VAT rates are not supported")
+        elif self.vat_rate != 0:
+            raise ValueError(f"vat_rate must be 0 when vat_category_code is {self.vat_category_code!r}")
         return self
 
 
@@ -176,3 +189,14 @@ class Invoice(BaseModel):
         if self.payment_terms_days is None:
             return None
         return self.issue_date + timedelta(days=self.payment_terms_days)
+
+    @model_validator(mode="after")
+    def _check_notes_present_for_exempt_line_items(self) -> Invoice:
+        # a non-standard VAT category needs a human-readable legal basis on the printed invoice
+        # (e.g. "Umsatzsteuerfrei gem. § 3a Abs. 2 UStG") - this only checks presence, not wording
+        if not self.notes and any(item.vat_category_code != STANDARD_VAT_CATEGORY_CODE for item in self.line_items):
+            raise ValueError(
+                "notes must state the VAT exemption/reverse-charge legal basis when any line item "
+                "uses a non-standard vat_category_code"
+            )
+        return self

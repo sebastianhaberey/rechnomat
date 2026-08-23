@@ -9,7 +9,7 @@ dotted paths, e.g. `address.address_line_1`), the constant's value, or a short e
 derived value is computed. "Optional" marks whether the field is only emitted when set in the
 input, as opposed to always being populated.
 
-Only the EN16931 profile, standard-rate VAT (category "S") is supported - see
+Only the EN16931 profile is supported, and only a closed set of VAT categories - see
 [Limitations](#limitations) below.
 
 ## Document header
@@ -77,7 +77,7 @@ BR-CO-26), enforced by a model validator.
 | BT-130 | Unit of measure code             | No       | Invoice YAML   | `line_items[].unit`                                            |
 | BT-131 | Invoice line net amount          | No       | Derived        | `quantity * unit_price_net`, rounded to cents                 |
 | BT-146 | Item net price                   | No       | Invoice YAML   | `line_items[].unit_price_net`                                  |
-| BT-151 | Invoiced item VAT category code  | No       | Constant       | `"S"` (standard rate)                                          |
+| BT-151 | Invoiced item VAT category code  | No       | Invoice YAML   | `line_items[].vat_category_code` (default `"S"`; see [Limitations](#limitations)) |
 | BT-152 | Invoiced item VAT rate           | No       | Invoice YAML   | `line_items[].vat_rate`                                        |
 | BT-153 | Item name                        | No       | Invoice YAML   | `line_items[].description`                                     |
 
@@ -85,10 +85,12 @@ BR-CO-26), enforced by a model validator.
 
 | BT     | Field                         | Optional | Source         | Field/Value                                                     |
 |--------|----------------------------------|----------|----------------|------------------------------------------------------------------------|
-| BT-116 | VAT category taxable amount      | No       | Derived        | Sum of line net amounts (BT-131) at that rate                        |
+| BT-116 | VAT category taxable amount      | No       | Derived        | Sum of line net amounts (BT-131) at that category/rate                |
 | BT-117 | VAT category tax amount          | No       | Derived        | Taxable amount (BT-116) × rate, rounded to cents                     |
-| BT-118 | VAT category code                | No       | Constant       | `"S"` (standard rate)                                                |
+| BT-118 | VAT category code                | No       | Derived        | `line_items[].vat_category_code` (grouping key)                      |
 | BT-119 | VAT category rate                | No       | Invoice YAML   | `line_items[].vat_rate` (grouping key)                               |
+| BT-120 | VAT exemption reason text        | Yes      | Derived        | Fixed English text per non-`"S"` category code (see [Limitations](#limitations)) |
+| BT-121 | VAT exemption reason code        | Yes      | Derived        | Fixed VATEX code per non-`"S"` category code, e.g. `"VATEX-EU-AE"` for `"AE"` |
 
 ## Document totals (BG-22)
 
@@ -102,10 +104,22 @@ BR-CO-26), enforced by a model validator.
 
 ## Limitations
 
-- **Standard-rate VAT only.** Every line item's VAT category is emitted as `"S"`; zero-rated,
-  exempt, reverse-charge, and other special VAT categories (which need an explicit category code
-  and a legal exemption reason, EN 16931 BG-23) are not supported. `vat_rate` must be positive in
-  every line item - enforced by a model validator.
+- **A closed set of VAT categories.** Supported line-item VAT categories (`vat_category_code`,
+  BT-151) are `"S"` (standard rate), `"AE"` (VAT reverse charge - e.g. a B2B service supplied to a
+  foreign business customer under §3a Abs. 2 UStG), `"E"` (exempt from VAT), `"G"` (export outside
+  the EU), and `"O"` (not subject to VAT) - the UNTDID 5305 codes relevant to a small German
+  business. Other categories (e.g. `"Z"` zero-rated goods, `"K"` intra-Community goods, `"L"`/`"M"`
+  Canary Islands/Ceuta/Melilla) aren't modeled. A non-standard category always implies
+  `vat_rate = 0` (enforced by a model validator); mixed reduced-rate-plus-exemption line items
+  aren't representable. Each non-`"S"` category maps to a fixed exemption reason
+  (BT-120/BT-121, see the VAT breakdown table above) for the XML - this is separate from, and not
+  required to match, the human-readable legal note (e.g. "Umsatzsteuerfrei gem. § 3a Abs. 2 UStG,
+  Umkehrung der Steuerschuld") that must still be entered manually via `invoice.notes` (a model
+  validator only checks that `notes` is non-empty when a non-standard category is used - it
+  doesn't validate or generate the wording). Whether a given invoice actually qualifies for one of
+  these categories (B2B vs. B2C, EU vs. third-country customer, which service-location rule
+  applies, etc.) is not derived from `country_code` or anywhere else - it's a manual, per-invoice
+  choice.
 - **Electronic address is always an email, not a Peppol ID.** BT-34/BT-49 are populated from
   `invoice_email` (seller/customer YAML) with EAS scheme `EM`, rather than a dedicated e-invoice
   routing address (e.g. a Peppol participant ID). `invoice_email` is kept separate from
@@ -117,6 +131,23 @@ BR-CO-26), enforced by a model validator.
   `"Zahlbar bis {due_date}"` when `payment_terms_days` is set, otherwise `"Zahlbar sofort"`.
 - **No allowances or charges.** Document-level and line-level allowances/charges (BG-20/BG-21,
   BT-92/BT-99 etc.) aren't modeled, so BT-106/BT-109 and BT-112/BT-115 are always equal pairs.
+  Example: a German business invoicing a UK business customer for a service, where the place of
+  supply shifts to the customer's country under §3a Abs. 2 UStG:
+  ```yaml
+  line_items:
+    - description: Consulting, August 2026
+      quantity: 8
+      unit: HUR
+      unit_price_net: "120.00"
+      vat_rate: 0
+      vat_category_code: AE
+  notes: >
+    Umsatzsteuerfrei gem. § 3a Abs. 2 UStG, Umkehrung der Steuerschuld / VAT-exempt according to
+    § 3a para. 2 UStG, reversal of tax liability
+  ```
 - **No schematron/business-rule validation in-app.** Only XSD-level structural validation runs
   in-process (via `drafthorse`'s `serialize(schema=...)` and `factur-x`'s `check_xsd`). Full EN
   16931 business-rule (BR-xx) validation - e.g. via the ELSTER e-invoice viewer - is a manual step.
+  This includes cross-file rules such as BR-AE-02 (a buyer VAT identifier is expected for
+  reverse-charge invoices): `Invoice` validators can't see the separately-loaded `Customer`, so
+  this isn't enforced by the app.

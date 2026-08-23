@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from rechnomat.model import Address, Customer, Invoice, Layout, Seller
+from rechnomat.model import Address, Customer, Invoice, Layout, LineItem, Seller
 
 VALID_CUSTOMER = {
     "name": "ACME GmbH",
@@ -162,3 +162,44 @@ def test_seller_requires_vat_id_or_tax_number():
     without_vat_id = {k: v for k, v in VALID_SELLER.items() if k != "vat_id"}
     with pytest.raises(ValidationError):
         Seller.model_validate(without_vat_id)
+
+
+def test_line_item_defaults_to_standard_vat_category():
+    item = LineItem.model_validate(VALID_INVOICE["line_items"][0])
+    assert item.vat_category_code == "S"
+
+
+def test_line_item_accepts_reverse_charge_with_zero_rate():
+    item = LineItem.model_validate({**VALID_INVOICE["line_items"][0], "vat_rate": 0, "vat_category_code": "AE"})
+    assert item.vat_rate == 0
+    assert item.vat_category_code == "AE"
+
+
+def test_line_item_rejects_reverse_charge_with_nonzero_rate():
+    with pytest.raises(ValidationError):
+        LineItem.model_validate({**VALID_INVOICE["line_items"][0], "vat_rate": 19, "vat_category_code": "AE"})
+
+
+def test_line_item_rejects_zero_rate_for_standard_category():
+    with pytest.raises(ValidationError):
+        LineItem.model_validate({**VALID_INVOICE["line_items"][0], "vat_rate": 0})
+
+
+def test_invoice_rejects_exempt_line_item_without_notes():
+    invalid = {
+        **VALID_INVOICE,
+        "line_items": [{**VALID_INVOICE["line_items"][0], "vat_rate": 0, "vat_category_code": "AE"}],
+    }
+    with pytest.raises(ValidationError):
+        Invoice.model_validate(invalid)
+
+
+def test_invoice_accepts_exempt_line_item_with_notes():
+    invoice = Invoice.model_validate(
+        {
+            **VALID_INVOICE,
+            "line_items": [{**VALID_INVOICE["line_items"][0], "vat_rate": 0, "vat_category_code": "AE"}],
+            "notes": "Umsatzsteuerfrei gem. § 3a Abs. 2 UStG, Umkehrung der Steuerschuld",
+        }
+    )
+    assert invoice.line_items[0].vat_category_code == "AE"

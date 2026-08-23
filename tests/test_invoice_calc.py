@@ -61,6 +61,44 @@ def test_compute_totals_separates_different_rates_sorted_ascending():
     assert totals.gross_total == Decimal("200.00") + Decimal("7.00") + Decimal("19.00")
 
 
+def test_compute_totals_separates_exempt_line_from_standard_rate_line():
+    invoice = Invoice.model_validate(
+        {
+            **BASE_INVOICE,
+            "notes": "Umsatzsteuerfrei gem. § 3a Abs. 2 UStG, Umkehrung der Steuerschuld",
+            "line_items": [
+                {
+                    "description": "Consulting DE",
+                    "quantity": "1",
+                    "unit": "EA",
+                    "unit_price_net": "100.00",
+                    "vat_rate": "19",
+                },
+                {
+                    "description": "Consulting UK",
+                    "quantity": "1",
+                    "unit": "EA",
+                    "unit_price_net": "200.00",
+                    "vat_rate": "0",
+                    "vat_category_code": "AE",
+                },
+            ],
+        }
+    )
+
+    totals = compute_totals(invoice)
+
+    assert len(totals.vat_groups) == 2
+    standard_group = next(group for group in totals.vat_groups if group.category_code == "S")
+    exempt_group = next(group for group in totals.vat_groups if group.category_code == "AE")
+    assert standard_group.rate == Decimal("19")
+    assert standard_group.vat_amount == Decimal("19.00")
+    assert exempt_group.rate == Decimal("0")
+    assert exempt_group.net_amount == Decimal("200.00")
+    assert exempt_group.vat_amount == Decimal("0.00")
+    assert totals.vat_total == Decimal("19.00")
+
+
 def test_compute_totals_line_amounts_preserve_order_and_items():
     invoice = _invoice(
         [

@@ -6,16 +6,25 @@ from drafthorse.models.payment import PaymentMeans, PaymentTerms
 from drafthorse.models.tradelines import LineItem as XmlLineItem
 
 from rechnomat.invoice_calc import InvoiceTotals, LineItemAmount, VatGroup, compute_totals
-from rechnomat.model import Address, Contact, Customer, Invoice, Seller
+from rechnomat.model import STANDARD_VAT_CATEGORY_CODE, Address, Contact, Customer, Invoice, Seller
 
 _GUIDELINE_PARAMETER_ID = "urn:cen.eu:en16931:2017"
 _INVOICE_TYPE_CODE = "380"
 _VAT_TYPE_CODE = "VAT"
-_STANDARD_VAT_CATEGORY_CODE = "S"
 _SEPA_CREDIT_TRANSFER_TYPE_CODE = "58"
 _EMAIL_SCHEME_ID = "EM"
 _VAT_SCHEME_ID = "VA"
 _TAX_NUMBER_SCHEME_ID = "FC"
+
+# (exemption_reason_code [BT-121, VATEX codelist], exemption_reason [BT-120, free text]) per
+# non-standard VAT category - fixed, machine-facing text; independent of the human-facing legal
+# note the seller writes into Invoice.notes for the printed page
+_VAT_EXEMPTION_TEXT_BY_CATEGORY: dict[str, tuple[str, str]] = {
+    "AE": ("VATEX-EU-AE", "Reverse charge"),
+    "E": ("VATEX-EU-E", "Exempt from VAT"),
+    "G": ("VATEX-EU-G", "Export outside the EU"),
+    "O": ("VATEX-EU-O", "Not subject to VAT"),
+}
 
 
 def build_invoice_xml(*, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller) -> bytes:
@@ -112,7 +121,7 @@ def _apply_line_items(doc: Document, line_amounts: list[LineItemAmount]) -> None
         xml_item.agreement.net.amount = item.unit_price_net
         xml_item.delivery.billed_quantity = (item.quantity, item.unit)
         xml_item.settlement.trade_tax.type_code = _VAT_TYPE_CODE
-        xml_item.settlement.trade_tax.category_code = _STANDARD_VAT_CATEGORY_CODE
+        xml_item.settlement.trade_tax.category_code = item.vat_category_code
         xml_item.settlement.trade_tax.rate_applicable_percent = item.vat_rate
         xml_item.settlement.monetary_summation.total_amount = line.net_amount
         doc.trade.items.add(xml_item)
@@ -124,8 +133,12 @@ def _apply_tax_breakdown(doc: Document, vat_groups: list[VatGroup]) -> None:
         tax.calculated_amount = group.vat_amount
         tax.type_code = _VAT_TYPE_CODE
         tax.basis_amount = group.net_amount
-        tax.category_code = _STANDARD_VAT_CATEGORY_CODE
+        tax.category_code = group.category_code
         tax.rate_applicable_percent = group.rate
+        if group.category_code != STANDARD_VAT_CATEGORY_CODE:
+            reason_code, reason_text = _VAT_EXEMPTION_TEXT_BY_CATEGORY[group.category_code]
+            tax.exemption_reason_code = reason_code
+            tax.exemption_reason = reason_text
         doc.trade.settlement.trade_tax.add(tax)
 
 

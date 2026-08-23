@@ -4,23 +4,36 @@ from pathlib import Path
 
 import jinja2
 
-from rechnomat.formatting import format_amount, format_date_de, format_decimal_de, format_percent, format_unit_de
+from rechnomat.formatting import (
+    format_amount,
+    format_date_de,
+    format_decimal_de,
+    format_percent,
+    format_unit_de,
+)
 from rechnomat.invoice_calc import compute_totals
 from rechnomat.letter_address import build_address_lines, build_return_address_line
-from rechnomat.model import Customer, Invoice, Seller
+from rechnomat.model import STANDARD_VAT_CATEGORY_CODE, Customer, Invoice, Seller
 
 _FONT_URL_RE = re.compile(r'url\("(fonts/[^"]+)"\)')
 
 
 def render_invoice_html(
-    *, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller, template_dir: Path
+    *,
+    invoice: Invoice,
+    invoice_number: str,
+    customer: Customer,
+    seller: Seller,
+    template_dir: Path,
 ) -> str:
     """
     Render `invoice` as a fully self-contained HTML string (CSS inlined, fonts embedded as base64
     data URIs) using the template.html + template.css found in `template_dir`. Does no PDF
     rendering - see invoice_pdf.render_invoice_pdf for the PDF-rendering step.
     """
-    context = _build_context(invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller)
+    context = _build_context(
+        invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller
+    )
     context["inline_css"] = _read_css_with_embedded_fonts(template_dir)
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(str(template_dir)),
@@ -29,7 +42,9 @@ def render_invoice_html(
     return env.get_template("template.html").render(**context)
 
 
-def _build_context(*, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller) -> dict:
+def _build_context(
+    *, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller
+) -> dict:
     totals = compute_totals(invoice)
     return {
         "invoice": invoice,
@@ -42,7 +57,9 @@ def _build_context(*, invoice: Invoice, invoice_number: str, customer: Customer,
             {
                 "description": line.item.description,
                 "quantity_text": f"{format_decimal_de(line.item.quantity)} {format_unit_de(line.item.unit)}",
-                "unit_price_text": format_amount(line.item.unit_price_net, invoice.currency),
+                "unit_price_text": format_amount(
+                    line.item.unit_price_net, invoice.currency
+                ),
                 "vat_rate_text": format_percent(line.item.vat_rate),
                 "amount_text": format_amount(line.net_amount, invoice.currency),
             }
@@ -53,6 +70,8 @@ def _build_context(*, invoice: Invoice, invoice_number: str, customer: Customer,
             {
                 "label": (
                     f"zzgl. {format_percent(group.rate)} USt. auf {format_amount(group.net_amount, invoice.currency)}"
+                    if group.category_code == STANDARD_VAT_CATEGORY_CODE
+                    else f"steuerfrei auf {format_amount(group.net_amount, invoice.currency)}"
                 ),
                 "amount_text": format_amount(group.vat_amount, invoice.currency),
             }

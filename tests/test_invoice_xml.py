@@ -153,3 +153,45 @@ def test_line_item_rejects_non_positive_vat_rate():
         except ValidationError:
             continue
         raise AssertionError(f"expected ValidationError for vat_rate={rate}")
+
+
+def test_build_invoice_xml_emits_exemption_reason_for_reverse_charge_line():
+    invoice = Invoice.model_validate(
+        {
+            **BASE_INVOICE,
+            "notes": "Umsatzsteuerfrei gem. § 3a Abs. 2 UStG, Umkehrung der Steuerschuld",
+            "line_items": [
+                {
+                    "description": "Consulting UK",
+                    "quantity": "1",
+                    "unit": "EA",
+                    "unit_price_net": "100.00",
+                    "vat_rate": "0",
+                    "vat_category_code": "AE",
+                }
+            ],
+        }
+    )
+
+    xml_bytes = build_invoice_xml(invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER)
+    root = etree.fromstring(xml_bytes)
+
+    line_tax = _xpath(root, "//ram:IncludedSupplyChainTradeLineItem//ram:ApplicableTradeTax")[0]
+    assert _xpath(line_tax, "ram:CategoryCode/text()")[0] == "AE"
+
+    tax_breakdown = _xpath(root, "//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax")
+    assert len(tax_breakdown) == 1
+    assert _xpath(tax_breakdown[0], "ram:CategoryCode/text()")[0] == "AE"
+    assert _xpath(tax_breakdown[0], "ram:ExemptionReasonCode/text()")[0] == "VATEX-EU-AE"
+    assert _xpath(tax_breakdown[0], "ram:ExemptionReason/text()")[0] == "Reverse charge"
+
+
+def test_build_invoice_xml_omits_exemption_reason_for_standard_rate():
+    invoice = Invoice.model_validate(BASE_INVOICE)
+
+    xml_bytes = build_invoice_xml(invoice=invoice, invoice_number="00000001", customer=CUSTOMER, seller=SELLER)
+    root = etree.fromstring(xml_bytes)
+
+    tax_breakdown = _xpath(root, "//ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax")[0]
+    assert _xpath(tax_breakdown, "ram:ExemptionReasonCode/text()") == []
+    assert _xpath(tax_breakdown, "ram:ExemptionReason/text()") == []
