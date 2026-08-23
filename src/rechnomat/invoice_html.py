@@ -31,9 +31,7 @@ def render_invoice_html(
     data URIs) using the template.html + template.css found in `template_dir`. Does no PDF
     rendering - see invoice_pdf.render_invoice_pdf for the PDF-rendering step.
     """
-    context = _build_context(
-        invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller
-    )
+    context = _build_context(invoice=invoice, invoice_number=invoice_number, customer=customer, seller=seller)
     context["inline_css"] = _read_css_with_embedded_fonts(template_dir)
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(str(template_dir)),
@@ -42,9 +40,7 @@ def render_invoice_html(
     return env.get_template("template.html").render(**context)
 
 
-def _build_context(
-    *, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller
-) -> dict:
+def _build_context(*, invoice: Invoice, invoice_number: str, customer: Customer, seller: Seller) -> dict:
     totals = compute_totals(invoice)
     return {
         "invoice": invoice,
@@ -57,9 +53,7 @@ def _build_context(
             {
                 "description": line.item.description,
                 "quantity_text": f"{format_decimal_de(line.item.quantity)} {format_unit_de(line.item.unit)}",
-                "unit_price_text": format_amount(
-                    line.item.unit_price_net, invoice.currency
-                ),
+                "unit_price_text": format_amount(line.item.unit_price_net, invoice.currency),
                 "vat_rate_text": format_percent(line.item.vat_rate),
                 "amount_text": format_amount(line.net_amount, invoice.currency),
             }
